@@ -276,9 +276,9 @@ export function PredictorPage() {
                     onChange={(e) => setSortMode(e.target.value as SortMode)}
                     className="glass-input px-2 py-1.5 rounded-lg text-[11px] font-bold cursor-pointer outline-none"
                   >
-                    <option value="percentile">Closest Percentile Match</option>
-                    <option value="alphabetical">Alphabetical (College)</option>
-                    <option value="district">By District Name</option>
+                    <option value="percentile" className="bg-slate-900 text-slate-100">Closest Percentile Match</option>
+                    <option value="alphabetical" className="bg-slate-900 text-slate-100">Alphabetical (College)</option>
+                    <option value="district" className="bg-slate-900 text-slate-100">By District Name</option>
                   </select>
                 </div>
 

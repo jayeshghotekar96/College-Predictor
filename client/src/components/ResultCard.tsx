@@ -130,7 +130,12 @@ export function ResultCard({
         {/* Trend */}
         <div className="flex flex-col items-start w-[80px]">
           <span className="text-[9px] uppercase tracking-wider font-heading font-bold text-white/50 mb-1 flex items-center gap-1">📈 3-Yr Trend</span>
-          <Sparkline cutoffs={branch.cutoffs} category={category} />
+          <Sparkline cutoffs={branch.cutoffs} category={result.appliedCategory || category} />
+          {result.appliedCategory && result.appliedCategory !== category && (
+            <span className="text-[8px] text-white/40 mt-0.5" title="Equivalent Category matched">
+              ({result.appliedCategory})
+            </span>
+          )}
         </div>
 
         {/* Probability & Cutoff */}

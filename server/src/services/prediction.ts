@@ -33,6 +33,32 @@ export interface PredictionResult {
   latestCutoff: number;
   trend: TrendProjection;
   roundTiming: 1 | 2 | 3;
+  appliedCategory: string;
+}
+
+export function getEquivalentCategories(category: string): string[] {
+  if (['GOPENS', 'GOPENH', 'GOPENO'].includes(category)) return ['GOPENS', 'GOPENH', 'GOPENO'];
+  if (['LOPENS', 'LOPENH', 'LOPENO'].includes(category)) return ['LOPENS', 'LOPENH', 'LOPENO'];
+  
+  const match = category.match(/^(.*?)(S|H|O)$/);
+  if (match) {
+    const base = match[1];
+    return [`${base}S`, `${base}H`, `${base}O`];
+  }
+  return [category];
+}
+
+export function getBestMatchingCategory(cutoffs: ICutoffRecord[], requestedCategory: string): string | null {
+  if (cutoffs.some(c => c.category === requestedCategory)) {
+    return requestedCategory;
+  }
+  const equivalents = getEquivalentCategories(requestedCategory);
+  for (const eq of equivalents) {
+    if (cutoffs.some(c => c.category === eq)) {
+      return eq;
+    }
+  }
+  return null;
 }
 
 export interface ReversePrediction {
@@ -236,15 +262,15 @@ export function predictAll(
         if (!filters.branches.includes(branch.courseName)) continue;
       }
 
-      const hasCategory = branch.cutoffs.some(c => c.category === category);
-      if (!hasCategory) continue;
+      const activeCategory = getBestMatchingCategory(branch.cutoffs, category);
+      if (!activeCategory) continue;
 
-      const chance = classifyChance(studentPercentile, category, branch.cutoffs);
+      const chance = classifyChance(studentPercentile, activeCategory, branch.cutoffs);
       if (chance === 'UNLIKELY') continue;
 
-      const trend = projectTrend(branch.cutoffs, category);
-      const latestCutoff = getLatestCutoff(branch.cutoffs, category) || trend.projected;
-      const roundTiming = getRoundTiming(branch.cutoffs, category);
+      const trend = projectTrend(branch.cutoffs, activeCategory);
+      const latestCutoff = getLatestCutoff(branch.cutoffs, activeCategory) || trend.projected;
+      const roundTiming = getRoundTiming(branch.cutoffs, activeCategory);
 
       const result: PredictionResult = {
         college: {
@@ -261,7 +287,8 @@ export function predictAll(
         chance,
         latestCutoff,
         trend,
-        roundTiming
+        roundTiming,
+        appliedCategory: activeCategory
       };
 
       if (chance === 'SAFE') safe.push(result);
@@ -320,10 +347,13 @@ export function buildHeatmapData(
     for (const branch of college.branches) {
       if (targetBranches.length > 0 && !targetBranches.includes(branch.courseName)) continue;
 
-      const trend = projectTrend(branch.cutoffs, category);
+      const activeCategory = getBestMatchingCategory(branch.cutoffs, category);
+      if (!activeCategory) continue;
+
+      const trend = projectTrend(branch.cutoffs, activeCategory);
       if (trend.direction === 'insufficient-data' && trend.projected === 0) continue;
 
-      const val = getLatestCutoff(branch.cutoffs, category) || trend.projected;
+      const val = getLatestCutoff(branch.cutoffs, activeCategory) || trend.projected;
       if (val === 0) continue;
 
       const key = `${college.district}||${branch.courseName}`;

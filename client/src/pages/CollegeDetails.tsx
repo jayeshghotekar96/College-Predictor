@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useData } from '../lib/DataContext';
+import { getBestMatchingCategory } from '../lib/prediction';
 import { Building2, MapPin, Target, Users, BookOpen, GraduationCap, Globe, Phone, Mail, ChevronRight, TrendingUp } from 'lucide-react';
 
 export function CollegeDetails() {
@@ -94,18 +95,19 @@ export function CollegeDetails() {
           
           {/* Branch Offerings & Cutoffs */}
           <div className="glass-panel p-6 md:p-8 rounded-2xl border border-white/10">
-             <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center justify-between mb-6">
                 <h2 className="text-2xl font-heading font-bold text-white flex items-center gap-2">
                   <BookOpen className="w-6 h-6 text-blue-400" /> Branch Offerings & Cutoffs
                 </h2>
                 <span className="text-xs font-semibold text-slate-400 bg-black/40 px-3 py-1 rounded-full border border-white/5">
-                  Based on GOPENS 2023-2025
+                  Based on General Open (2023-2025)
                 </span>
              </div>
 
              <div className="space-y-4">
                 {college.branches.map(branch => {
-                  const gopensCutoffs = branch.cutoffs.filter(c => c.category === 'GOPENS');
+                  const bestOpenCategory = getBestMatchingCategory(branch.cutoffs, 'GOPENS') || 'GOPENS';
+                  const gopensCutoffs = branch.cutoffs.filter(c => c.category === bestOpenCategory);
                   const latestYear = gopensCutoffs.length > 0 
                     ? Math.max(...gopensCutoffs.map(c => c.year)) 
                     : 'N/A';
@@ -126,7 +128,10 @@ export function CollegeDetails() {
                       </div>
                       
                       <div className="shrink-0 text-right">
-                        <div className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Avg Cutoff ({latestYear})</div>
+                        <div className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">
+                          Avg Cutoff ({latestYear})
+                          {bestOpenCategory !== 'GOPENS' && <span className="ml-1 opacity-70 normal-case tracking-normal">[{bestOpenCategory}]</span>}
+                        </div>
                         {gopensPercentile ? (
                           <div className="text-2xl font-mono font-extrabold text-emerald-400 flex items-center gap-1">
                             {gopensPercentile.toFixed(2)}%

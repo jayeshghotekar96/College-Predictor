@@ -89,6 +89,7 @@ export interface PredictionResult {
   latestCutoff: number;
   trend: TrendProjection;
   roundTiming: 1 | 2 | 3;
+  appliedCategory: string;
 }
 
 export interface ReversePrediction {

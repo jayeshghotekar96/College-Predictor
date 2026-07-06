@@ -1,5 +1,36 @@
 import type { College, Branch, CutoffRecord, ChanceLevel, TrendProjection, PredictionResult, ReversePrediction, TrendDirection } from '../types';
 
+export function getEquivalentCategories(category: string): string[] {
+  // If user picks an Open category, allow State, Home, and Other variants
+  if (['GOPENS', 'GOPENH', 'GOPENO'].includes(category)) return ['GOPENS', 'GOPENH', 'GOPENO'];
+  if (['LOPENS', 'LOPENH', 'LOPENO'].includes(category)) return ['LOPENS', 'LOPENH', 'LOPENO'];
+  
+  // Standard regex to catch S (State), H (Home), O (Other) suffixes
+  const match = category.match(/^(.*?)(S|H|O)$/);
+  if (match) {
+    const base = match[1];
+    return [`${base}S`, `${base}H`, `${base}O`];
+  }
+  return [category];
+}
+
+export function getBestMatchingCategory(cutoffs: CutoffRecord[], requestedCategory: string): string | null {
+  // Try exact match first
+  if (cutoffs.some(c => c.category === requestedCategory)) {
+    return requestedCategory;
+  }
+  
+  // Try equivalent variants (H, O, S)
+  const equivalents = getEquivalentCategories(requestedCategory);
+  for (const eq of equivalents) {
+    if (cutoffs.some(c => c.category === eq)) {
+      return eq;
+    }
+  }
+  
+  return null;
+}
+
 // ── Helper: Get Latest Year's Cutoff ───────────────────────────────────
 
 export function getLatestCutoff(cutoffs: CutoffRecord[], category: string): number | null {
@@ -272,16 +303,16 @@ export function predictAll(
         }
       }
 
-      // Check if there are any cutoffs for this specific category
-      const hasCategory = branch.cutoffs.some(c => c.category === category);
-      if (!hasCategory) continue;
+      // Check if there are any cutoffs for this specific category or its equivalents
+      const activeCategory = getBestMatchingCategory(branch.cutoffs, category);
+      if (!activeCategory) continue;
 
-      const chance = classifyChance(studentPercentile, category, branch.cutoffs);
+      const chance = classifyChance(studentPercentile, activeCategory, branch.cutoffs);
       if (chance === "UNLIKELY") continue;
 
-      const trend = projectTrend(branch.cutoffs, category);
-      const latestCutoff = getLatestCutoff(branch.cutoffs, category) || trend.projected;
-      const roundTiming = getRoundTiming(branch.cutoffs, category);
+      const trend = projectTrend(branch.cutoffs, activeCategory);
+      const latestCutoff = getLatestCutoff(branch.cutoffs, activeCategory) || trend.projected;
+      const roundTiming = getRoundTiming(branch.cutoffs, activeCategory);
 
       const result: PredictionResult = {
         college,
@@ -289,7 +320,8 @@ export function predictAll(
         chance,
         latestCutoff,
         trend,
-        roundTiming
+        roundTiming,
+        appliedCategory: activeCategory
       };
 
       if (chance === "SAFE") {
@@ -339,13 +371,17 @@ export function buildHeatmapData(
         continue;
       }
 
+      // Check equivalent category
+      const activeCategory = getBestMatchingCategory(branch.cutoffs, category);
+      if (!activeCategory) continue;
+
       // Find the trend projection or latest cutoff for this category
-      const trend = projectTrend(branch.cutoffs, category);
+      const trend = projectTrend(branch.cutoffs, activeCategory);
       if (trend.direction === "insufficient-data" && trend.projected === 0) {
         continue;
       }
 
-      const val = getLatestCutoff(branch.cutoffs, category) || trend.projected;
+      const val = getLatestCutoff(branch.cutoffs, activeCategory) || trend.projected;
       if (val === 0) continue;
 
       const key = `${college.district}||${branch.courseName}`;

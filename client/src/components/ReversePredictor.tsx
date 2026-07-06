@@ -147,12 +147,17 @@ export function ReversePredictor({ colleges, categories, defaultCategory }: Reve
             className="w-full glass-input px-3 py-2 rounded-sm text-xs font-medium cursor-pointer [&>option]:bg-black [&>option]:text-white focus:outline-none"
           >
             {Object.entries(categories)
+              .filter(([code]) => !code.endsWith('H') && !code.endsWith('O'))
               .sort((a, b) => a[0].localeCompare(b[0]))
-              .map(([code, info]) => (
-                <option key={code} value={code}>
-                  {code} — {info.label.split(',').slice(0, 2).join(',')}
-                </option>
-              ))}
+              .map(([code, info]) => {
+                const parts = info.label.split(',').slice(0, 2);
+                const cleanLabel = parts.join(',').replace(/\s*\(General\)/, '');
+                return (
+                  <option key={code} value={code}>
+                    {code.replace(/S$/, '')} — {cleanLabel}
+                  </option>
+                );
+              })}
           </select>
         </div>
 

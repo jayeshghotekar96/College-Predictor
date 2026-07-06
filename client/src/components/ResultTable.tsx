@@ -214,7 +214,12 @@ export function ResultTable({
 
                   {/* 3yr Trend Sparkline */}
                   <td className="px-3 py-3 text-center text-xs">
-                    <Sparkline cutoffs={branch.cutoffs} category={category} />
+                    <Sparkline cutoffs={branch.cutoffs} category={res.appliedCategory || category} />
+                    {res.appliedCategory && res.appliedCategory !== category && (
+                      <div className="text-[8px] text-white/40 mt-1" title="Equivalent Category matched">
+                        ({res.appliedCategory})
+                      </div>
+                    )}
                   </td>
 
                   {/* Chance Badge */}
