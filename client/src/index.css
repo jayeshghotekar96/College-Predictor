@@ -1,0 +1,245 @@
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+@import "tailwindcss";
+
+@theme {
+  /* Design tokens — CAP Predictor Premium Glass Palette */
+  --color-ink: #f8fafc;
+  --color-paper: transparent;
+  --color-amber: #fbbf24;
+  --color-safe: #10b981;
+  --color-moderate: #f59e0b;
+  --color-reach: #f43f5e;
+  --color-ink-light: #e2e8f0;
+  --color-ink-muted: #94a3b8;
+  --color-paper-warm: rgba(255, 255, 255, 0.03);
+  --color-paper-cool: rgba(255, 255, 255, 0.1);
+  --color-amber-light: rgba(251, 191, 36, 0.2);
+  --color-safe-light: rgba(16, 185, 129, 0.15);
+  --color-moderate-light: rgba(245, 158, 11, 0.15);
+  --color-reach-light: rgba(244, 63, 94, 0.15);
+
+  --font-heading: 'Space Grotesk', system-ui, sans-serif;
+  --font-body: 'Inter', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+}
+
+/* Base styles */
+html {
+  font-family: var(--font-body);
+  background-color: #0b0f19;
+  color: var(--color-ink);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  /* Deep vibrant mesh gradient */
+  background: 
+    radial-gradient(circle at 15% 50%, rgba(79, 70, 229, 0.15), transparent 25%),
+    radial-gradient(circle at 85% 30%, rgba(236, 72, 153, 0.15), transparent 25%),
+    radial-gradient(circle at 50% 100%, rgba(14, 165, 233, 0.1), transparent 30%),
+    linear-gradient(135deg, #0f172a 0%, #09090b 100%);
+  background-attachment: fixed;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-heading);
+  letter-spacing: -0.02em;
+}
+
+/* Monospace numbers — ticker board style */
+.mono {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.04em;
+}
+
+/* Premium glassmorphic card layout */
+.ticket-stub {
+  position: relative;
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--radius-md);
+  box-shadow: 0 4px 24px -1px rgba(0, 0, 0, 0.2);
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.2s;
+}
+
+.ticket-stub:hover {
+  transform: translateY(-2px) scale(1.005);
+  box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.3);
+  border-color: rgba(255, 255, 255, 0.15);
+}
+
+/* Punched notches at the fold line (large screens) */
+@media (min-width: 768px) {
+  /* Dashed vertical separator representing perforation */
+  .ticket-perforation {
+    position: absolute;
+    right: 247px;
+    top: 8px;
+    bottom: 8px;
+    width: 2px;
+    border-left: 2px dashed rgba(255, 255, 255, 0.15);
+    pointer-events: none;
+    z-index: 5;
+  }
+}
+
+/* Colored indicator bar */
+.ticket-tab {
+  width: 5px;
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  border-radius: var(--radius-md) 0 0 var(--radius-md);
+}
+
+.ticket-tab-safe { background-color: var(--color-safe); }
+.ticket-tab-moderate { background-color: var(--color-moderate); }
+.ticket-tab-reach { background-color: var(--color-reach); }
+
+/* Glassmorphism utility classes */
+.glass-panel {
+  background: rgba(15, 23, 42, 0.4);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+}
+
+.glass-input {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: var(--color-ink);
+  transition: all 0.2s ease;
+}
+
+.glass-input:focus {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: var(--color-amber);
+  box-shadow: 0 0 0 2px rgba(251, 191, 36, 0.2);
+  outline: none;
+}
+
+/* Entrance transitions */
+@keyframes ticket-enter {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.ticket-enter {
+  animation: ticket-enter 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  opacity: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ticket-enter {
+    animation: none;
+    opacity: 1;
+  }
+}
+
+/* Range input layout */
+input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 6px;
+  border-radius: 3px;
+  background: var(--color-paper-cool);
+  outline: none;
+  transition: background 0.15s ease;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--color-amber);
+  cursor: pointer;
+  border: 2px solid white;
+  box-shadow: 0 3px 8px rgba(22, 35, 63, 0.18);
+  transition: transform 0.1s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+input[type="range"]::-webkit-slider-thumb:hover {
+  transform: scale(1.2);
+}
+
+input[type="range"]::-webkit-slider-thumb:active {
+  transform: scale(1.1);
+  background: var(--color-ink-light);
+}
+
+input[type="range"]::-moz-range-thumb {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--color-amber);
+  cursor: pointer;
+  border: 2px solid white;
+  box-shadow: 0 3px 8px rgba(22, 35, 63, 0.18);
+}
+
+/* Accessibility settings */
+*:focus-visible {
+  outline: 2px solid var(--color-amber);
+  outline-offset: 3px;
+}
+
+/* Scrollbar polish */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-paper-cool);
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-ink-muted);
+}
+
+/* Staggered fadeIn animations */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes slideLeft {
+  from { transform: translateX(100%); }
+  to { transform: translateX(0); }
+}
+
+.animate-slideLeft {
+  animation: slideLeft 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+

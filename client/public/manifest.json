@@ -1,0 +1,15 @@
+{
+  "short_name": "CAP Predictor",
+  "name": "Maharashtra CAP Round Admission Predictor",
+  "icons": [
+    {
+      "src": "favicon.svg",
+      "sizes": "64x64 32x32 24x24 16x16",
+      "type": "image/svg+xml"
+    }
+  ],
+  "start_url": ".",
+  "display": "standalone",
+  "theme_color": "#16233F",
+  "background_color": "#F7F5F0"
+}
