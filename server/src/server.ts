@@ -1,5 +1,6 @@
 import express from 'express';
 import cors from 'cors';
+import compression from 'compression';
 import dotenv from 'dotenv';
 import path from 'path';
 import { connectDB } from './config/db';
@@ -17,6 +18,7 @@ const PORT = parseInt(process.env.PORT || '5000', 10);
 
 // ── Middleware ──────────────────────────────────────────────────────────
 
+app.use(compression());
 app.use(cors({
   origin: ['http://localhost:5173', 'http://localhost:5174', 'http://localhost:5175', process.env.CLIENT_URL || 'http://localhost:5173'],
   credentials: true,

@@ -35,41 +35,49 @@ self.addEventListener('activate', (event) => {
 
 self.addEventListener('fetch', (event) => {
   // @ts-ignore
-  if (event.request.method !== 'GET') return;
+  const request = event.request;
+
+  if (request.method !== 'GET') return;
   
+  const url = new URL(request.url);
+
+  // Ignore non-HTTP requests (like ws:// or chrome-extension://)
+  if (!url.protocol.startsWith('http')) return;
+
+  // Ignore API requests and Vite HMR polling/tokens
+  if (url.pathname.startsWith('/api') || url.search.includes('token=') || url.pathname.includes('@vite')) {
+    return;
+  }
+
   // @ts-ignore
   event.respondWith(
-    // @ts-ignore
-    caches.match(event.request).then((cachedResponse) => {
+    caches.match(request).then((cachedResponse) => {
       if (cachedResponse) {
         // Fetch fresh copy in the background to update the cache
-        // @ts-ignore
-        fetch(event.request).then((networkResponse) => {
+        fetch(request).then((networkResponse) => {
           if (networkResponse.status === 200) {
             caches.open(CACHE_NAME).then((cache) => {
-              // @ts-ignore
-              cache.put(event.request, networkResponse);
+              cache.put(request, networkResponse);
             });
           }
         }).catch(() => {});
-        
         return cachedResponse;
       }
       
-      // @ts-ignore
-      return fetch(event.request).then((networkResponse) => {
-        // @ts-ignore
+      return fetch(request).then((networkResponse) => {
         if (!networkResponse || networkResponse.status !== 200) {
           return networkResponse;
         }
         
         const responseToCache = networkResponse.clone();
         caches.open(CACHE_NAME).then((cache) => {
-          // @ts-ignore
-          cache.put(event.request, responseToCache);
+          cache.put(request, responseToCache);
         });
         
         return networkResponse;
+      }).catch(error => {
+        console.error('[SW] Fetch failed:', error);
+        throw error;
       });
     })
   );

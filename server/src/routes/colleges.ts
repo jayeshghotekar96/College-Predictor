@@ -4,11 +4,19 @@ import { Meta } from '../models/Meta';
 
 const router = Router();
 
+// In-memory cache for heavy dataset payloads (Data only changes yearly)
+const cache: Record<string, any> = {};
+
 // GET /api/colleges/category-map — decoded category map for dropdowns
 router.get('/category-map', async (_req: Request, res: Response) => {
   try {
+    if (cache['category-map']) {
+      return res.json(cache['category-map']);
+    }
     const meta = await Meta.findOne({ key: 'dataset' }).lean();
-    res.json({ categories: meta?.categories || {} });
+    const data = { categories: meta?.categories || {} };
+    cache['category-map'] = data;
+    res.json(data);
   } catch (error) {
     console.error('[Colleges] Category-map error:', error);
     res.status(500).json({ error: 'Failed to fetch category map' });
@@ -58,8 +66,13 @@ router.get('/', async (req: Request, res: Response) => {
 // GET /api/colleges/all — return ALL colleges (for prediction engine)
 router.get('/all', async (_req: Request, res: Response) => {
   try {
+    if (cache['all']) {
+      return res.json(cache['all']);
+    }
     const colleges = await College.find({}).lean();
-    res.json({ colleges });
+    const data = { colleges };
+    cache['all'] = data;
+    res.json(data);
   } catch (error) {
     console.error('[Colleges] All error:', error);
     res.status(500).json({ error: 'Failed to fetch all colleges' });
@@ -102,6 +115,9 @@ router.get('/categories', async (_req: Request, res: Response) => {
 // GET /api/colleges/meta — dataset metadata
 router.get('/meta', async (_req: Request, res: Response) => {
   try {
+    if (cache['meta']) {
+      return res.json(cache['meta']);
+    }
     const totalColleges = await College.countDocuments();
     const colleges = await College.find({}).lean();
     
@@ -121,7 +137,7 @@ router.get('/meta', async (_req: Request, res: Response) => {
       }
     }
 
-    res.json({
+    const data = {
       meta: {
         totalColleges,
         totalBranches,
@@ -129,7 +145,9 @@ router.get('/meta', async (_req: Request, res: Response) => {
         years: Array.from(yearsSet).sort(),
         rounds: Array.from(roundsSet).sort(),
       }
-    });
+    };
+    cache['meta'] = data;
+    res.json(data);
   } catch (error) {
     console.error('[Colleges] Meta error:', error);
     res.status(500).json({ error: 'Failed to fetch metadata' });
@@ -150,5 +168,52 @@ router.get('/:code', async (req: Request, res: Response) => {
     res.status(500).json({ error: 'Failed to fetch college' });
   }
 });
+
+// Internal Cache Warmup
+setTimeout(async () => {
+  try {
+    console.log('[Colleges] Warming up in-memory cache...');
+    
+    // Warm up /category-map
+    const metaDoc = await Meta.findOne({ key: 'dataset' }).lean();
+    cache['category-map'] = { categories: metaDoc?.categories || {} };
+
+    // Warm up /all
+    const allColleges = await College.find({}).lean();
+    cache['all'] = { colleges: allColleges };
+
+    // Warm up /meta
+    const totalColleges = allColleges.length;
+    let totalBranches = 0;
+    let totalRecords = 0;
+    const yearsSet = new Set<number>();
+    const roundsSet = new Set<number>();
+
+    for (const college of allColleges) {
+      totalBranches += college.branches.length;
+      for (const branch of college.branches) {
+        totalRecords += branch.cutoffs.length;
+        for (const cutoff of branch.cutoffs) {
+          yearsSet.add(cutoff.year);
+          roundsSet.add(cutoff.round);
+        }
+      }
+    }
+
+    cache['meta'] = {
+      meta: {
+        totalColleges,
+        totalBranches,
+        totalRecords,
+        years: Array.from(yearsSet).sort(),
+        rounds: Array.from(roundsSet).sort(),
+      }
+    };
+
+    console.log('[Colleges] Cache warmup complete!');
+  } catch (err) {
+    console.error('[Colleges] Cache warmup failed:', err);
+  }
+}, 2000); // Wait 2s after startup to ensure DB is connected
 
 export default router;

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import type { SearchFilters, DecodedCategory } from '../types';
 
 interface SearchFormProps {
@@ -19,6 +19,14 @@ export function SearchForm({
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [branchSearch, setBranchSearch] = useState('');
   const [districtSearch, setDistrictSearch] = useState('');
+  
+  // Decoupled local state for the slider to prevent hanging
+  const [localPercentile, setLocalPercentile] = useState(filters.percentile);
+
+  // Sync local state if URL state changes externally
+  useEffect(() => {
+    setLocalPercentile(filters.percentile);
+  }, [filters.percentile]);
 
   // Handle inputs
   const handlePercentileChange = (val: number) => {
@@ -96,8 +104,10 @@ export function SearchForm({
                 step="0.01"
                 min="0"
                 max="100"
-                value={filters.percentile}
-                onChange={(e) => handlePercentileChange(parseFloat(e.target.value) || 0)}
+                value={localPercentile}
+                onChange={(e) => setLocalPercentile(parseFloat(e.target.value) || 0)}
+                onBlur={() => handlePercentileChange(localPercentile)}
+                onKeyDown={(e) => e.key === 'Enter' && handlePercentileChange(localPercentile)}
                 className="mono font-semibold text-sm w-20 text-right glass-input px-2 py-1 rounded-sm"
               />
               <span className="text-xs text-white/50">%</span>
@@ -110,10 +120,12 @@ export function SearchForm({
               min="0"
               max="100"
               step="0.05"
-              value={filters.percentile}
-              onChange={(e) => handlePercentileChange(parseFloat(e.target.value))}
+              value={localPercentile}
+              onChange={(e) => setLocalPercentile(parseFloat(e.target.value))}
+              onMouseUp={() => handlePercentileChange(localPercentile)}
+              onTouchEnd={() => handlePercentileChange(localPercentile)}
               style={{
-                background: `linear-gradient(to right, var(--color-amber) 0%, var(--color-amber) ${filters.percentile}%, rgba(255,255,255,0.1) ${filters.percentile}%, rgba(255,255,255,0.1) 100%)`
+                background: `linear-gradient(to right, var(--color-amber) 0%, var(--color-amber) ${localPercentile}%, rgba(255,255,255,0.1) ${localPercentile}%, rgba(255,255,255,0.1) 100%)`
               }}
               className="flex-1 cursor-pointer"
             />
