@@ -12,23 +12,30 @@ A modern, high-performance web application designed to predict Maharashtra CAP (
 * **Smart Option Form Builder**: An interactive drag-and-drop builder to organize your chosen colleges by preference rank.
 * **CAP Progress Dashboard**: Real-time tracking of the official MHT-CET CAP timeline, updated for the 2026-27 academic year.
 
+## Performance Optimizations (Production Ready)
+* **API Caching**: In-memory LRU cache and optimized `Cache-Control` headers for rapid responses.
+* **Database Indexing**: Compound indexes on Mongoose schemas and lean query projections.
+* **UI Virtualization**: Efficient row rendering for thousands of results using `@tanstack/react-virtual`.
+* **Code Splitting**: Route-level lazy loading (`React.lazy`) and manual chunk splitting for dependencies.
+* **Gzip & Brotli**: Compressed assets delivery generated automatically during Vite builds.
+
 ## Repository Structure
 
 ```
 cap-predictor-mern/
-├── client/          # React 19 + Vite + Tailwind front-end
+├── client/          # React 19 + Vite + Tailwind front-end (ESM)
 │   └── src/
 │       ├── components/   # SearchForm, ResultCard, Layout, MobileNav…
 │       ├── hooks/        # useShortlist, useOptionForm (100% localStorage)
 │       ├── lib/          # DataContext + client prediction engine
 │       ├── pages/        # Dashboard, CollegeExplorer, Predictor...
 │       └── services/     # Axios API client
-└── server/          # Express 5 + Mongoose Read-Only API
+└── server/          # Express 5 + Mongoose Read-Only API (ESM)
     └── src/
         ├── models/       # College, Meta (Read-only data)
         ├── routes/       # colleges, predictions, admin
         ├── services/     # server-side prediction engine
-        └── seed.ts       # imports cutoffs.json into MongoDB
+        └── seed.js       # imports cutoffs.json into MongoDB
 ```
 
 ## Prerequisites

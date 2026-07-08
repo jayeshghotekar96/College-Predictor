@@ -1,12 +1,12 @@
 {
   "name": "cap-predictor-server",
   "version": "1.0.0",
+  "type": "module",
   "private": true,
   "scripts": {
-    "dev": "tsx watch src/server.ts",
-    "start": "node dist/server.js",
-    "build": "tsc",
-    "seed": "tsx src/seed.ts"
+    "dev": "node --watch src/server.js",
+    "start": "node src/server.js",
+    "seed": "node src/seed.js"
   },
   "dependencies": {
     "bcryptjs": "^3.0.2",
@@ -18,15 +18,5 @@
     "mongoose": "^8.16.2",
     "multer": "^2.0.1"
   },
-  "devDependencies": {
-    "@types/bcryptjs": "^3.0.0",
-    "@types/compression": "^1.8.1",
-    "@types/cors": "^2.8.18",
-    "@types/express": "^5.0.3",
-    "@types/jsonwebtoken": "^9.0.10",
-    "@types/multer": "*",
-    "@types/node": "^24.13.2",
-    "tsx": "^4.20.3",
-    "typescript": "~6.0.2"
-  }
+  "devDependencies": {}
 }
