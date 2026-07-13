@@ -1,5 +1,5 @@
-import { useState, useMemo } from "react";
-import { reversePredict } from "../lib/prediction";
+import { useState, useMemo, useEffect } from "react";
+import { predictionsAPI } from "../services/api";
 import { TrendChart } from "./TrendChart";
 
 export function ReversePredictor({ colleges, categories, defaultCategory }) {
@@ -36,17 +36,44 @@ export function ReversePredictor({ colleges, categories, defaultCategory }) {
   // Determine available branches for the selected college
   const branchesList = selectedCollege ? selectedCollege.branches : [];
 
-  // Calculation details
-  const reverseResult = useMemo(() => {
-    if (!selectedCollege || !selectedBranch) return null;
-    // Check if there are any cutoffs for this specific category
-    const hasCategory = selectedBranch.cutoffs.some(
-      (c) => c.category === selectedCategory,
-    );
-    if (!hasCategory) return null;
+  const [reverseResult, setReverseResult] = useState(null);
+  const [isPredicting, setIsPredicting] = useState(false);
 
-    return reversePredict(selectedCollege, selectedBranch, selectedCategory);
-  }, [selectedCollege, selectedBranch, selectedCategory]);
+  useEffect(() => {
+    if (!selectedCollegeCode || !selectedChoiceCode || !selectedCategory) {
+      setReverseResult(null);
+      return;
+    }
+
+    let isMounted = true;
+    setIsPredicting(true);
+
+    predictionsAPI.reverse({
+      collegeCode: selectedCollegeCode,
+      choiceCode: selectedChoiceCode,
+      category: selectedCategory,
+    })
+      .then((res) => {
+        if (isMounted) {
+          setReverseResult({
+            prediction: res.data.prediction,
+            cutoffs: res.data.branch.cutoffs,
+          });
+          setIsPredicting(false);
+        }
+      })
+      .catch((err) => {
+        if (isMounted) {
+          console.error("Reverse prediction error:", err);
+          setReverseResult(null);
+          setIsPredicting(false);
+        }
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, [selectedCollegeCode, selectedChoiceCode, selectedCategory]);
 
   const confidenceColors = {
     high: "bg-safe/10 text-safe border-safe/20",
@@ -167,7 +194,12 @@ export function ReversePredictor({ colleges, categories, defaultCategory }) {
       {/* Results View */}
       {selectedCollege && selectedBranch && (
         <div className="pt-5 border-t border-white/10 animate-fadeIn">
-          {reverseResult ? (
+          {isPredicting ? (
+            <div className="text-center py-8 text-slate-400">
+              <div className="w-6 h-6 border-2 border-slate-700 border-t-emerald-500 rounded-full animate-spin mx-auto mb-2" />
+              <span className="text-xs">Calculating...</span>
+            </div>
+          ) : reverseResult?.prediction ? (
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
               {/* Ticket-Stub Style Prediction Card */}
               <div className="lg:col-span-1 ticket-stub glass-panel border border-white/20 p-5 pl-7 relative">
@@ -182,7 +214,7 @@ export function ReversePredictor({ colleges, categories, defaultCategory }) {
                     Recommended Score
                   </span>
                   <div className="mono text-4xl font-extrabold text-white flex items-baseline">
-                    {reverseResult.requiredPercentile.toFixed(2)}
+                    {reverseResult.prediction.requiredPercentile.toFixed(2)}
                     <span className="text-sm font-normal text-white/50 ml-1">
                       %ile
                     </span>
@@ -196,7 +228,7 @@ export function ReversePredictor({ colleges, categories, defaultCategory }) {
                     </span>
                     <span className="font-semibold text-white/80">
                       {
-                        selectedBranch.cutoffs.filter(
+                        reverseResult.cutoffs.filter(
                           (c) => c.category === selectedCategory,
                         ).length
                       }{" "}
@@ -208,17 +240,17 @@ export function ReversePredictor({ colleges, categories, defaultCategory }) {
                     <span className="text-white/50">Confidence Level:</span>
                     <span
                       className={`text-[10px] uppercase font-bold px-2 py-0.5 border rounded-sm ${
-                        confidenceColors[reverseResult.confidence]
+                        confidenceColors[reverseResult.prediction.confidence]
                       }`}
                     >
-                      {reverseResult.confidence}
+                      {reverseResult.prediction.confidence}
                     </span>
                   </div>
 
                   <div className="flex justify-between items-center text-xs">
                     <span className="text-white/50">Round Timing:</span>
                     <span className="mono font-semibold bg-white/20 px-2 py-0.5 rounded-sm text-white">
-                      Round {reverseResult.roundLikely}
+                      Round {reverseResult.prediction.roundLikely}
                     </span>
                   </div>
                 </div>
@@ -233,7 +265,7 @@ export function ReversePredictor({ colleges, categories, defaultCategory }) {
               {/* Historical Trend Chart */}
               <div className="lg:col-span-2">
                 <TrendChart
-                  cutoffs={selectedBranch.cutoffs}
+                  cutoffs={reverseResult.cutoffs}
                   category={selectedCategory}
                 />
               </div>

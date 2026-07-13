@@ -46,6 +46,8 @@ export const authAPI = {
 export const collegesAPI = {
   getAll: () => api.get("/colleges/all"),
 
+  getLight: () => api.get("/colleges/light"),
+
   getBranches: () => api.get("/colleges/branches"),
 
   getDistricts: () => api.get("/colleges/districts"),
@@ -55,6 +57,8 @@ export const collegesAPI = {
   getCategoryMap: () => api.get("/colleges/category-map"),
 
   getMeta: () => api.get("/colleges/meta"),
+
+  getCollegeByCode: (code) => api.get(`/colleges/${code}`),
 };
 
 // ── Predictions API ────────────────────────────────────────────────────

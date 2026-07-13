@@ -158,31 +158,8 @@ export function OptionFormPanel({
                       }
                     `}</style>
                     {optionForm.map((item, idx) => {
-                      // Lookup cutoff dynamically
-                      let latestCutoff = 0;
-                      if (data) {
-                        const college = data.colleges.find(
-                          (c) => c.collegeCode === item.collegeCode,
-                        );
-                        if (college) {
-                          const branch = college.branches.find(
-                            (b) => b.choiceCode === item.choiceCode,
-                          );
-                          if (branch) {
-                            const gopensCutoffs = branch.cutoffs.filter(
-                              (c) => c.category === "GOPENS",
-                            );
-                            const maxYear =
-                              gopensCutoffs.length > 0
-                                ? Math.max(...gopensCutoffs.map((c) => c.year))
-                                : 0;
-                            const cutoffRec = gopensCutoffs.find(
-                              (c) => c.year === maxYear,
-                            );
-                            if (cutoffRec) latestCutoff = cutoffRec.percentile;
-                          }
-                        }
-                      }
+                      // Use cutoff from item if available
+                      const latestCutoff = item.latestCutoff || 0;
                       return (
                         <div
                           key={item.choiceCode}

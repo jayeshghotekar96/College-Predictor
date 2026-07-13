@@ -1,6 +1,6 @@
-import { useMemo } from "react";
 import { useParams, Link } from "react-router-dom";
-import { useData } from "../lib/DataContext";
+import { useState, useEffect } from "react";
+import { collegesAPI } from "../services/api";
 import { getBestMatchingCategory } from "../lib/prediction";
 import {
   Building2,
@@ -17,12 +17,31 @@ import {
 
 export function CollegeDetails() {
   const { code } = useParams();
-  const { data, loading, error } = useData();
+  const [college, setCollege] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  const college = useMemo(() => {
-    if (!data || !code) return null;
-    return data.colleges.find((c) => c.collegeCode.toString() === code) || null;
-  }, [data, code]);
+  useEffect(() => {
+    let isMounted = true;
+    setLoading(true);
+    collegesAPI
+      .getCollegeByCode(code)
+      .then((res) => {
+        if (isMounted) {
+          setCollege(res.data);
+          setLoading(false);
+        }
+      })
+      .catch((err) => {
+        if (isMounted) {
+          setError(err.message || "Failed to load college details.");
+          setLoading(false);
+        }
+      });
+    return () => {
+      isMounted = false;
+    };
+  }, [code]);
 
   if (loading)
     return (
@@ -30,10 +49,10 @@ export function CollegeDetails() {
         Loading details...
       </div>
     );
-  if (error || !data)
+  if (error)
     return (
       <div className="flex-1 flex items-center justify-center text-red-400">
-        Error loading data.
+        {error}
       </div>
     );
   if (!college)

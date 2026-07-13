@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { buildHeatmapData } from "../lib/prediction";
+import { useState, useEffect } from "react";
+import { predictionsAPI } from "../services/api";
 
 const DEFAULT_DISTRICTS = [
   "Pune",
@@ -35,12 +35,29 @@ export function CompetitivenessHeatmap({
     allBranches.filter((b) => DEFAULT_BRANCHES.includes(b)).slice(0, 7),
   );
 
-  const heatmapData = buildHeatmapData(
-    colleges,
-    category,
-    selectedDistricts,
-    selectedBranches,
-  );
+  const [heatmapData, setHeatmapData] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    let isMounted = true;
+    setIsLoading(true);
+    predictionsAPI.heatmap({
+      category,
+      districts: selectedDistricts,
+      branches: selectedBranches
+    }).then(res => {
+      if (isMounted) {
+        setHeatmapData(res.data.heatmap || []);
+        setIsLoading(false);
+      }
+    }).catch(err => {
+      if (isMounted) {
+        console.error("Heatmap error:", err);
+        setIsLoading(false);
+      }
+    });
+    return () => { isMounted = false; };
+  }, [category, selectedDistricts, selectedBranches]);
 
   // Map data to a grid lookup
   const grid = {};
@@ -154,7 +171,7 @@ export function CompetitivenessHeatmap({
       </div>
 
       {/* Heatmap Grid Table */}
-      <div className="overflow-x-auto border border-white/10 rounded-sm">
+      <div className={`overflow-x-auto border border-white/10 rounded-sm transition-opacity duration-300 ${isLoading ? 'opacity-50 pointer-events-none' : ''}`}>
         <table className="min-w-full divide-y divide-white/10">
           <thead className="bg-white/10">
             <tr>

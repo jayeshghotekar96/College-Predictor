@@ -15,7 +15,7 @@ export function useOptionForm() {
     items.map((item, idx) => ({ ...item, rank: idx + 1 }));
 
   const addOption = useCallback(
-    (collegeCode, choiceCode, collegeName, courseName, district) => {
+    (collegeCode, choiceCode, collegeName, courseName, district, latestCutoff = 0) => {
       if (optionForm.some((item) => item.choiceCode === choiceCode)) return;
 
       const newItem = {
@@ -24,6 +24,7 @@ export function useOptionForm() {
         collegeName,
         courseName,
         district,
+        latestCutoff,
         rank: optionForm.length + 1,
       };
 

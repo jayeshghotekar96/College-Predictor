@@ -2,7 +2,7 @@ import React, { useState, useMemo, useDeferredValue } from "react";
 import { useData } from "../lib/DataContext";
 import { useUrlState } from "../hooks/useUrlState";
 import { useShortlist } from "../hooks/useShortlist";
-import { predictAll } from "../lib/prediction";
+import { predictionsAPI } from "../services/api";
 import { SearchForm } from "../components/SearchForm";
 import { ResultCard } from "../components/ResultCard";
 import { ShortlistPanel } from "../components/ShortlistPanel";
@@ -75,14 +75,38 @@ export function PredictorPage() {
     return Array.from(set).sort();
   }, [data]);
 
-  // Run the core prediction engine
-  const predictionResults = useMemo(() => {
-    if (!data) return { safe: [], moderate: [], reach: [] };
-    return predictAll(filters.percentile, filters.category, data.colleges, {
+  const [predictionResults, setPredictionResults] = useState({ safe: [], moderate: [], reach: [] });
+  const [isPredicting, setIsPredicting] = useState(false);
+  const [predictionError, setPredictionError] = useState(null);
+
+  // Fetch predictions from the server when filters change
+  React.useEffect(() => {
+    if (!filters.percentile || !filters.category) return;
+    
+    let isMounted = true;
+    setIsPredicting(true);
+    setPredictionError(null);
+    
+    predictionsAPI.predict({
+      percentile: filters.percentile,
+      category: filters.category,
       branches: filters.branches,
-      districts: filters.districts,
+      districts: filters.districts
+    }).then(res => {
+      if (isMounted) {
+        setPredictionResults(res.data.results);
+        setIsPredicting(false);
+      }
+    }).catch(err => {
+      if (isMounted) {
+        console.error("Prediction error:", err);
+        setPredictionError(err.message || "Failed to load predictions");
+        setIsPredicting(false);
+      }
     });
-  }, [data, filters]);
+
+    return () => { isMounted = false; };
+  }, [filters]);
 
   // Apply search query match and sorting selection using DEFERRED search term
   const filteredAndSortedResults = useMemo(() => {
@@ -210,11 +234,12 @@ export function PredictorPage() {
     collegeName,
     courseName,
     district,
+    latestCutoff,
   ) => {
     if (hasOption(choiceCode)) {
       removeOption(choiceCode);
     } else {
-      addOption(collegeCode, choiceCode, collegeName, courseName, district);
+      addOption(collegeCode, choiceCode, collegeName, courseName, district, latestCutoff);
     }
   };
 
@@ -343,7 +368,7 @@ export function PredictorPage() {
                   <h2 className="font-heading text-lg font-bold text-white flex items-center gap-2">
                     <span>Admission Predictions</span>
                     <span className="mono text-xs font-bold bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 px-2 py-0.5 rounded-full">
-                      {totalResultsCount} Matches
+                      {isPredicting ? "Loading..." : `${totalResultsCount} Matches`}
                     </span>
                   </h2>
                   <p className="text-xs text-slate-400 mt-0.5">
@@ -382,7 +407,19 @@ export function PredictorPage() {
                 )}
               </div>
 
-              {totalResultsCount === 0 ? (
+              {isPredicting ? (
+                <div className="glass-panel rounded-xl p-12 text-center text-slate-400">
+                  <div className="w-8 h-8 border-4 border-slate-700 border-t-emerald-500 rounded-full animate-spin mx-auto mb-4" />
+                  <p className="font-heading text-sm font-semibold text-slate-300">
+                    Calculating Predictions...
+                  </p>
+                </div>
+              ) : predictionError ? (
+                <div className="glass-panel rounded-xl p-12 text-center text-red-400">
+                  <p className="font-heading text-sm font-semibold">Error</p>
+                  <p className="text-xs mt-1 max-w-md mx-auto">{predictionError}</p>
+                </div>
+              ) : totalResultsCount === 0 ? (
                 <div className="glass-panel rounded-xl p-12 text-center text-slate-400">
                   <p className="font-heading text-sm font-semibold text-slate-300">
                     No cutoff predictions found
@@ -466,6 +503,7 @@ export function PredictorPage() {
                                 res.college.collegeName,
                                 res.branch.courseName,
                                 res.college.district,
+                                res.latestCutoff
                               )
                             }
                             index={i}
@@ -519,6 +557,7 @@ export function PredictorPage() {
                                 res.college.collegeName,
                                 res.branch.courseName,
                                 res.college.district,
+                                res.latestCutoff
                               )
                             }
                             index={i}
@@ -572,6 +611,7 @@ export function PredictorPage() {
                                 res.college.collegeName,
                                 res.branch.courseName,
                                 res.college.district,
+                                res.latestCutoff
                               )
                             }
                             index={i}
@@ -623,6 +663,7 @@ export function PredictorPage() {
                                 res.college.collegeName,
                                 res.branch.courseName,
                                 res.college.district,
+                                res.latestCutoff
                               )
                             }
                             index={i}

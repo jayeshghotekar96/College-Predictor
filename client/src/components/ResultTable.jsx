@@ -319,11 +319,12 @@ export const ResultTable = React.memo(function ResultTable({
                       <button
                         onClick={() =>
                           onToggleOption(
-                            college.collegeCode,
-                            branch.choiceCode,
-                            college.collegeName,
-                            branch.courseName,
-                            college.district,
+                            res.college.collegeCode,
+                            res.branch.choiceCode,
+                            res.college.collegeName,
+                            res.branch.courseName,
+                            res.college.district,
+                            res.latestCutoff
                           )
                         }
                         className={`p-1 hover:bg-paper rounded-full transition-colors cursor-pointer ${

@@ -25,6 +25,7 @@ router.get("/category-map", async (_req, res) => {
   }
 });
 
+
 // GET /api/colleges — list all colleges (paginated)
 router.get("/", async (req, res) => {
   try {
@@ -81,6 +82,24 @@ router.get("/all", async (_req, res) => {
   } catch (error) {
     console.error("[Colleges] All error:", error);
     res.status(500).json({ error: "Failed to fetch all colleges" });
+  }
+});
+
+// GET /api/colleges/light — return colleges without cutoffs (fast initial load)
+router.get("/light", async (_req, res) => {
+  try {
+    if (cache["light"]) {
+      res.set("Cache-Control", "public, max-age=86400");
+      return res.json(cache["light"]);
+    }
+    const colleges = await College.find({}).select("-branches.cutoffs").lean();
+    const data = { colleges };
+    cache["light"] = data;
+    res.set("Cache-Control", "public, max-age=86400");
+    res.json(data);
+  } catch (error) {
+    console.error("[Colleges] Light error:", error);
+    res.status(500).json({ error: "Failed to fetch light colleges" });
   }
 });
 
@@ -191,6 +210,10 @@ setTimeout(async () => {
     const allColleges = await College.find({}).lean();
     cache["all"] = { colleges: allColleges };
 
+    // Warm up /light
+    const lightColleges = await College.find({}).select("-branches.cutoffs").lean();
+    cache["light"] = { colleges: lightColleges };
+
     // Warm up /meta
     const totalColleges = allColleges.length;
     let totalBranches = 0;
@@ -224,5 +247,21 @@ setTimeout(async () => {
     console.error("[Colleges] Cache warmup failed:", err);
   }
 }, 2000); // Wait 2s after startup to ensure DB is connected
+
+// GET /api/colleges/:code — fetch a single college by its code (includes full cutoffs)
+router.get("/:code", async (req, res) => {
+  try {
+    const code = req.params.code;
+    const college = await College.findOne({ collegeCode: code }).lean();
+    if (!college) {
+      return res.status(404).json({ error: "College not found" });
+    }
+    res.set("Cache-Control", "public, max-age=86400");
+    res.json(college);
+  } catch (error) {
+    console.error(`[Colleges] Error fetching college ${req.params.code}:`, error);
+    res.status(500).json({ error: "Failed to fetch college details" });
+  }
+});
 
 export default router;

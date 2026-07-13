@@ -24,7 +24,7 @@ export function DataProvider({ children }) {
       // Try API first (MERN backend)
       const [{ data: apiData }, { data: metaData }, { data: categoryData }] =
         await Promise.all([
-          collegesAPI.getAll(),
+          collegesAPI.getLight(),
           collegesAPI.getMeta(),
           collegesAPI.getCategoryMap(),
         ]);

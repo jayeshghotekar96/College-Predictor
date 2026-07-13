@@ -110,6 +110,7 @@ router.post("/reverse", async (req, res) => {
       branch: {
         choiceCode: branch.choiceCode,
         courseName: branch.courseName,
+        cutoffs: branch.cutoffs,
       },
     });
   } catch (error) {
