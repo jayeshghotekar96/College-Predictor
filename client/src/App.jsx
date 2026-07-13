@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import React, { Suspense } from "react";
 import { Layout } from "./components/Layout";
+import { SpeedInsights } from "@vercel/speed-insights/react";
 
 const PredictorPage = React.lazy(() => import("./pages/Predictor").then(module => ({ default: module.PredictorPage })));
 const LandingPage = React.lazy(() => import("./pages/Landing").then(module => ({ default: module.LandingPage })));
@@ -38,6 +39,7 @@ function App() {
           </Route>
         </Routes>
       </Suspense>
+      <SpeedInsights />
     </BrowserRouter>
   );
 }
