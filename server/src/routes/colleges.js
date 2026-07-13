@@ -181,22 +181,7 @@ router.get("/meta", async (_req, res) => {
   }
 });
 
-// GET /api/colleges/:code — single college by code
-router.get("/:code", async (req, res) => {
-  try {
-    const college = await College.findOne({
-      collegeCode: req.params.code,
-    }).lean();
-    if (!college) {
-      res.status(404).json({ error: "College not found" });
-      return;
-    }
-    res.json({ college });
-  } catch (error) {
-    console.error("[Colleges] Get error:", error);
-    res.status(500).json({ error: "Failed to fetch college" });
-  }
-});
+
 
 // Internal Cache Warmup
 setTimeout(async () => {

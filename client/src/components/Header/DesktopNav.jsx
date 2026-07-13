@@ -24,13 +24,13 @@ const MENU_ITEMS = [
       {
         name: "College Prediction",
         path: "/predict",
-        icon: <Target className="w-4 h-4 text-blue-400" />,
+        icon: <Target className="w-4 h-4 text-emerald-400" />,
         desc: "Find matches based on your percentile",
       },
       {
         name: "Reverse Predictor",
         path: "/predict?tab=reverse",
-        icon: <Search className="w-4 h-4 text-indigo-400" />,
+        icon: <Search className="w-4 h-4 text-emerald-400" />,
         desc: "See required percentile for colleges",
       },
       {
@@ -42,7 +42,7 @@ const MENU_ITEMS = [
       {
         name: "Branch Predictor",
         path: "/predict?branch=CS",
-        icon: <LayoutDashboard className="w-4 h-4 text-cyan-400" />,
+        icon: <LayoutDashboard className="w-4 h-4 text-emerald-400" />,
         desc: "Specialized CS/IT/AI predictions",
       },
     ],
@@ -67,13 +67,13 @@ const MENU_ITEMS = [
       {
         name: "Government Institutes",
         path: "/colleges?type=Govt",
-        icon: <Building2 className="w-4 h-4 text-blue-400" />,
+        icon: <Building2 className="w-4 h-4 text-emerald-400" />,
         desc: "State-funded engineering colleges",
       },
       {
         name: "Autonomous",
         path: "/colleges?type=Autonomous",
-        icon: <Target className="w-4 h-4 text-purple-400" />,
+        icon: <Target className="w-4 h-4 text-emerald-400" />,
         desc: "Institutes with academic autonomy",
       },
     ],
@@ -117,13 +117,13 @@ const MENU_ITEMS = [
       {
         name: "Option Form Strategy",
         path: "/resources/option-form",
-        icon: <Target className="w-4 h-4 text-blue-400" />,
+        icon: <Target className="w-4 h-4 text-emerald-400" />,
         desc: "How to build the perfect preference list",
       },
       {
         name: "Document Checklist",
         path: "/resources/documents",
-        icon: <BookOpen className="w-4 h-4 text-indigo-400" />,
+        icon: <BookOpen className="w-4 h-4 text-emerald-400" />,
         desc: "Required documents for verification",
       },
     ],
@@ -154,7 +154,7 @@ export function DesktopNav() {
               {item.icon}
               {item.title}
               <ChevronDown
-                className={`w-3 h-3 transition-transform duration-300 ${activeMenu === item.title ? "rotate-180 text-blue-400" : ""}`}
+                className={`w-3 h-3 transition-transform duration-300 ${activeMenu === item.title ? "rotate-180 text-emerald-400" : ""}`}
               />
 
               {isActive && (
@@ -175,7 +175,7 @@ export function DesktopNav() {
                   transition={{ duration: 0.2, ease: "easeOut" }}
                   className="absolute top-full left-1/2 -translate-x-1/2 mt-2 w-[500px] p-4 bg-slate-900/95 backdrop-blur-3xl rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.5)] border border-white/10 grid grid-cols-2 gap-2 z-50 overflow-hidden"
                 >
-                  <div className="absolute inset-0 bg-gradient-to-b from-blue-500/10 to-transparent pointer-events-none" />
+                  <div className="absolute inset-0 bg-gradient-to-b from-emerald-500/10 to-transparent pointer-events-none" />
 
                   {item.submenu.map((sub) => (
                     <Link
@@ -189,7 +189,7 @@ export function DesktopNav() {
                         </div>
                         <span className="font-semibold text-slate-200 group-hover:text-white text-sm flex items-center gap-1.5">
                           {sub.name}
-                          <ArrowRight className="w-3 h-3 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all text-blue-400" />
+                          <ArrowRight className="w-3 h-3 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all text-emerald-400" />
                         </span>
                       </div>
                       <span className="text-xs text-slate-500 group-hover:text-slate-400 pl-9 transition-colors">
@@ -206,7 +206,7 @@ export function DesktopNav() {
                     </span>
                     <Link
                       to={item.path}
-                      className="text-xs font-bold text-blue-400 hover:text-blue-300 transition-colors flex items-center gap-1"
+                      className="text-xs font-bold text-emerald-400 hover:text-emerald-300 transition-colors flex items-center gap-1"
                     >
                       View All {item.title} <ArrowRight className="w-3 h-3" />
                     </Link>

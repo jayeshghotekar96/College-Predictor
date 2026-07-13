@@ -59,7 +59,7 @@ export function ProbabilityMeter({
           strokeDasharray={circumference}
           initial={{ strokeDashoffset: circumference }}
           animate={{ strokeDashoffset }}
-          transition={{ duration: 1.5, ease: "easeOut" }}
+          transition={{ duration: 0.5, ease: "easeOut" }}
           strokeLinecap="round"
           stroke="currentColor"
           fill="transparent"

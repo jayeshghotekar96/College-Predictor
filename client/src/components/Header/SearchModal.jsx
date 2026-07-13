@@ -114,8 +114,8 @@ export function SearchModal({ isOpen, onClose }) {
                           onClick={() => handleSearch(query)}
                           className="w-full flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-white/5 transition-colors text-left group border border-transparent hover:border-white/10"
                         >
-                          <div className="p-2 bg-blue-500/10 rounded-lg group-hover:bg-blue-500/20 transition-colors">
-                            <Search className="w-4 h-4 text-blue-400" />
+                          <div className="p-2 bg-emerald-500/10 rounded-lg group-hover:bg-emerald-500/20 transition-colors">
+                            <Search className="w-4 h-4 text-emerald-400" />
                           </div>
                           <span className="text-white font-medium text-sm">
                             Search for "{query}"
@@ -176,7 +176,7 @@ export function SearchModal({ isOpen, onClose }) {
                           className="flex flex-col p-3 rounded-xl border border-white/5 hover:bg-white/5 transition-all text-left group"
                         >
                           <div className="flex items-center gap-2 mb-1">
-                            <MapPin className="w-4 h-4 text-blue-400" />
+                            <MapPin className="w-4 h-4 text-emerald-400" />
                             <span className="font-semibold text-sm text-slate-200 group-hover:text-white">
                               Pune vs Mumbai
                             </span>

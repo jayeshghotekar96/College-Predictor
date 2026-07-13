@@ -88,7 +88,7 @@ export function MobileNav({ onOpenSearch }) {
                     {
                       name: "Predict",
                       path: "/predict",
-                      icon: <Target className="w-5 h-5 text-blue-400" />,
+                      icon: <Target className="w-5 h-5 text-emerald-400" />,
                     },
                     {
                       name: "Colleges",
@@ -108,7 +108,7 @@ export function MobileNav({ onOpenSearch }) {
                     {
                       name: "Resources",
                       path: "/resources",
-                      icon: <BookOpen className="w-5 h-5 text-indigo-400" />,
+                      icon: <BookOpen className="w-5 h-5 text-emerald-400" />,
                     },
                   ].map((link) => (
                     <button
@@ -132,7 +132,7 @@ export function MobileNav({ onOpenSearch }) {
                 {/* User Section */}
                 <div className="flex flex-col gap-3 pb-6">
                   <div className="flex items-center gap-3 p-4 bg-white/5 border border-white/10 rounded-xl mb-2">
-                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-indigo-500 flex items-center justify-center font-bold text-white shadow-inner">
+                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-emerald-500 to-emerald-500 flex items-center justify-center font-bold text-white shadow-inner">
                       G
                     </div>
                     <div className="flex flex-col flex-1 overflow-hidden">

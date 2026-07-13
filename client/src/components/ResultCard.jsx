@@ -1,7 +1,8 @@
 import React, { useState } from "react";
 import { Sparkline } from "./TrendChart";
 import { ProbabilityMeter } from "./ProbabilityMeter";
-import { Link } from "react-router-dom";
+import { PrefetchLink } from "./ui/PrefetchLink";
+import { motion } from "framer-motion";
 import { Heart, FileText, Scale, Copy, Check } from "lucide-react";
 
 export const ResultCard = React.memo(function ResultCard({
@@ -69,12 +70,12 @@ export const ResultCard = React.memo(function ResultCard({
 
       {/* 2. Identity Layer */}
       <div className="mb-4">
-        <Link
+        <PrefetchLink
           to={`/colleges/${college.collegeCode}`}
           className="group block"
           title={college.collegeName}
         >
-          <h3 className="font-heading text-base md:text-lg font-extrabold text-white leading-snug line-clamp-2 group-hover:text-blue-400 group-hover:underline transition-colors flex items-start gap-2">
+          <h3 className="font-heading text-base md:text-lg font-extrabold text-white leading-snug line-clamp-2 group-hover:text-emerald-400 group-hover:underline transition-colors flex items-start gap-2">
             <span className="shrink-0 text-xl mt-0.5">🏛</span>
             <span>
               {college.collegeName}
@@ -83,7 +84,7 @@ export const ResultCard = React.memo(function ResultCard({
               </span>
             </span>
           </h3>
-        </Link>
+        </PrefetchLink>
         <div className="flex items-center gap-1.5 mt-2 text-xs text-white/50 pl-7">
           <span className="shrink-0 text-sm">📍</span>
           <span className="font-semibold text-white/70">
@@ -179,9 +180,9 @@ export const ResultCard = React.memo(function ResultCard({
         </div>
       </div>
 
-      {/* 5. Action Buttons Layer */}
       <div className="flex items-center gap-2 mt-4">
-        <button
+        <motion.button
+          whileTap={{ scale: 0.95 }}
           onClick={(e) => {
             e.stopPropagation();
             onToggleShortlist();
@@ -196,17 +197,23 @@ export const ResultCard = React.memo(function ResultCard({
             className={`w-3.5 h-3.5 ${isShortlisted ? "fill-reach" : ""}`}
           />
           {isShortlisted ? "Saved" : "Save"}
-        </button>
+        </motion.button>
 
-        <Link
+        <PrefetchLink
           to={`/colleges/${college.collegeCode}`}
-          className="flex-1 flex items-center justify-center gap-1.5 py-2 px-2 bg-white/5 hover:bg-white/10 border border-white/10 text-white/70 hover:text-white rounded-md text-xs font-semibold transition-all"
+          className="flex-1"
         >
-          <FileText className="w-3.5 h-3.5" />
-          Details
-        </Link>
+          <motion.div
+            whileTap={{ scale: 0.95 }}
+            className="flex h-full items-center justify-center gap-1.5 py-2 px-2 bg-white/5 hover:bg-white/10 border border-white/10 text-white/70 hover:text-white rounded-md text-xs font-semibold transition-all"
+          >
+            <FileText className="w-3.5 h-3.5" />
+            Details
+          </motion.div>
+        </PrefetchLink>
 
-        <button
+        <motion.button
+          whileTap={{ scale: 0.95 }}
           onClick={(e) => {
             e.stopPropagation();
             onToggleOption();
@@ -221,7 +228,7 @@ export const ResultCard = React.memo(function ResultCard({
             className={`w-3.5 h-3.5 ${isAddedToOption ? "fill-amber-500/30" : ""}`}
           />
           {isAddedToOption ? "Compare" : "Compare"}
-        </button>
+        </motion.button>
       </div>
     </div>
   );

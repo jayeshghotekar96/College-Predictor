@@ -56,7 +56,7 @@ export function Dashboard() {
             variants={fadeIn}
             className="flex items-center gap-6"
           >
-            <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-3xl font-extrabold text-white shadow-lg border border-white/10">
+            <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-emerald-500 to-emerald-600 flex items-center justify-center text-3xl font-extrabold text-white shadow-lg border border-white/10">
               G
             </div>
             <div>
@@ -82,8 +82,8 @@ export function Dashboard() {
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div className="glass-panel p-5 rounded-2xl border border-white/10">
               <div className="flex items-center justify-between mb-4">
-                <div className="p-2 bg-blue-500/20 rounded-lg">
-                  <Bookmark className="w-5 h-5 text-blue-400" />
+                <div className="p-2 bg-emerald-500/20 rounded-lg">
+                  <Bookmark className="w-5 h-5 text-emerald-400" />
                 </div>
                 <span className="text-2xl font-bold font-mono text-white">
                   {shortlist.length}
@@ -96,8 +96,8 @@ export function Dashboard() {
 
             <div className="glass-panel p-5 rounded-2xl border border-white/10">
               <div className="flex items-center justify-between mb-4">
-                <div className="p-2 bg-indigo-500/20 rounded-lg">
-                  <BookOpen className="w-5 h-5 text-indigo-400" />
+                <div className="p-2 bg-emerald-500/20 rounded-lg">
+                  <BookOpen className="w-5 h-5 text-emerald-400" />
                 </div>
                 <span className="text-2xl font-bold font-mono text-white">
                   4
@@ -127,12 +127,12 @@ export function Dashboard() {
           <div className="glass-panel rounded-2xl border border-white/10 overflow-hidden">
             <div className="px-6 py-5 border-b border-white/5 flex items-center justify-between">
               <h2 className="text-lg font-heading font-bold text-white flex items-center gap-2">
-                <Building2 className="w-5 h-5 text-blue-400" />
+                <Building2 className="w-5 h-5 text-emerald-400" />
                 Your Shortlist
               </h2>
               <Link
                 to="/predict"
-                className="text-sm text-blue-400 hover:text-blue-300 transition-colors flex items-center gap-1 font-semibold"
+                className="text-sm text-emerald-400 hover:text-emerald-300 transition-colors flex items-center gap-1 font-semibold"
               >
                 Explore More <ArrowRight className="w-4 h-4" />
               </Link>
@@ -145,7 +145,7 @@ export function Dashboard() {
                   <p>Your shortlist is empty.</p>
                   <Link
                     to="/predict"
-                    className="text-blue-400 hover:underline mt-2 inline-block"
+                    className="text-emerald-400 hover:underline mt-2 inline-block"
                   >
                     Find colleges to save
                   </Link>
@@ -158,14 +158,14 @@ export function Dashboard() {
                   >
                     <div>
                       <div className="flex items-center gap-2 mb-1">
-                        <span className="text-xs font-mono font-bold px-2 py-0.5 rounded bg-blue-500/20 text-blue-300 border border-blue-500/30">
+                        <span className="text-xs font-mono font-bold px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
                           {item.choiceCode}
                         </span>
                         <span className="text-xs font-semibold text-slate-400 bg-black/40 px-2 py-0.5 rounded border border-white/5">
                           {item.district}
                         </span>
                       </div>
-                      <h3 className="font-semibold text-white group-hover:text-blue-400 transition-colors">
+                      <h3 className="font-semibold text-white group-hover:text-emerald-400 transition-colors">
                         {item.collegeName}
                       </h3>
                       <p className="text-sm text-slate-400 mt-0.5">
@@ -203,14 +203,14 @@ export function Dashboard() {
                       step.status === "completed"
                         ? "border-emerald-500 text-emerald-400"
                         : step.status === "active"
-                          ? "border-blue-500 text-blue-400 shadow-[0_0_15px_rgba(59,130,246,0.5)]"
+                          ? "border-emerald-500 text-emerald-400 shadow-[0_0_15px_rgba(16,185,129,0.5)]"
                           : "border-slate-700 text-slate-600"
                     }`}
                   >
                     {step.status === "completed" ? (
                       <CheckCircle2 className="w-5 h-5" />
                     ) : step.status === "active" ? (
-                      <div className="w-3 h-3 bg-blue-500 rounded-full animate-pulse" />
+                      <div className="w-3 h-3 bg-emerald-500 rounded-full animate-pulse" />
                     ) : (
                       <span className="text-xs font-bold">{i + 1}</span>
                     )}
@@ -246,7 +246,7 @@ export function Dashboard() {
 
             <div className="w-full bg-slate-800 rounded-full h-2.5 mb-4 overflow-hidden border border-white/5">
               <div
-                className="bg-gradient-to-r from-blue-500 to-indigo-500 h-2.5 rounded-full"
+                className="bg-gradient-to-r from-emerald-500 to-emerald-500 h-2.5 rounded-full"
                 style={{ width: "60%" }}
               ></div>
             </div>
@@ -258,12 +258,12 @@ export function Dashboard() {
                   Created
                 </span>
               </button>
-              <button className="w-full flex items-center justify-between p-3 rounded-xl bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/20 transition-colors group text-sm">
-                <span className="flex items-center gap-2 text-blue-400 font-semibold">
-                  <div className="w-4 h-4 rounded-full border-2 border-blue-400" />{" "}
+              <button className="w-full flex items-center justify-between p-3 rounded-xl bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/20 transition-colors group text-sm">
+                <span className="flex items-center gap-2 text-emerald-400 font-semibold">
+                  <div className="w-4 h-4 rounded-full border-2 border-emerald-400" />{" "}
                   Enter CET Scores
                 </span>
-                <ChevronRight className="w-4 h-4 text-blue-400 group-hover:translate-x-1 transition-transform" />
+                <ChevronRight className="w-4 h-4 text-emerald-400 group-hover:translate-x-1 transition-transform" />
               </button>
               <button className="w-full flex items-center justify-between p-3 rounded-xl bg-white/5 hover:bg-white/10 transition-colors border border-white/5 group text-sm">
                 <span className="flex items-center gap-2 text-slate-400">

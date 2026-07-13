@@ -1,13 +1,6 @@
-import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import {
-  Target,
-  Search,
-  BarChart3,
-  ListOrdered,
-  ChevronRight,
-  GraduationCap,
-} from "lucide-react";
+import { Building2, ChevronRight, Target, Brain, LineChart, ListOrdered, Search, GraduationCap, BarChart3 } from "lucide-react";
+import { PrefetchLink } from "../components/ui/PrefetchLink";
 
 const fadeIn = {
   hidden: { opacity: 0, y: 20 },
@@ -20,8 +13,8 @@ export function LandingPage() {
       {/* Hero Section */}
       <section className="relative pt-32 pb-20 md:pt-48 md:pb-32 overflow-hidden">
         {/* Background Gradients */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-blue-600/20 rounded-full blur-[120px] pointer-events-none" />
-        <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-indigo-600/10 rounded-full blur-[100px] pointer-events-none" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-emerald-600/20 rounded-full blur-[120px] pointer-events-none" />
+        <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-emerald-600/10 rounded-full blur-[100px] pointer-events-none" />
 
         <div className="max-w-7xl mx-auto px-6 relative z-10 text-center">
           <motion.div
@@ -30,8 +23,8 @@ export function LandingPage() {
             transition={{ duration: 0.6 }}
             variants={fadeIn}
           >
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-xs font-semibold mb-8">
-              <span className="w-2 h-2 rounded-full bg-blue-500 animate-pulse" />
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-semibold mb-8">
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
               Maharashtra CAP 2026 Admissions
             </div>
           </motion.div>
@@ -64,19 +57,23 @@ export function LandingPage() {
             variants={fadeIn}
             className="flex flex-col sm:flex-row items-center justify-center gap-4"
           >
-            <Link
-              to="/predict"
-              className="w-full sm:w-auto px-8 py-4 bg-blue-600 hover:bg-blue-500 text-white rounded-xl font-semibold text-lg transition-all shadow-[0_0_30px_rgba(37,99,235,0.4)] flex items-center justify-center gap-2"
-            >
-              Start Prediction
-              <ChevronRight className="w-5 h-5" />
-            </Link>
-            <Link
-              to="/colleges"
-              className="w-full sm:w-auto px-8 py-4 bg-white/5 hover:bg-white/10 border border-white/10 text-white rounded-xl font-semibold text-lg transition-all flex items-center justify-center gap-2"
-            >
-              Explore Colleges
-            </Link>
+            <PrefetchLink to="/predict">
+              <motion.div
+                whileTap={{ scale: 0.95 }}
+                className="w-full sm:w-auto px-8 py-4 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl font-semibold text-lg transition-all shadow-[0_0_30px_rgba(16,185,129,0.4)] flex items-center justify-center gap-2"
+              >
+                Start Prediction
+                <ChevronRight className="w-5 h-5" />
+              </motion.div>
+            </PrefetchLink>
+            <PrefetchLink to="/colleges">
+              <motion.div
+                whileTap={{ scale: 0.95 }}
+                className="w-full sm:w-auto px-8 py-4 bg-white/5 hover:bg-white/10 border border-white/10 text-white rounded-xl font-semibold text-lg transition-all flex items-center justify-center gap-2"
+              >
+                Explore Colleges
+              </motion.div>
+            </PrefetchLink>
           </motion.div>
         </div>
       </section>
@@ -127,7 +124,7 @@ export function LandingPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {[
               {
-                icon: <Target className="w-8 h-8 text-blue-400" />,
+                icon: <Target className="w-8 h-8 text-emerald-400" />,
                 title: "College Predictor",
                 desc: "Instantly view Safe, Moderate, and Reach options based on your exact percentile and category.",
               },
@@ -137,12 +134,12 @@ export function LandingPage() {
                 desc: "Select a target college and branch to see exactly what percentile is required for admission.",
               },
               {
-                icon: <BarChart3 className="w-8 h-8 text-indigo-400" />,
+                icon: <BarChart3 className="w-8 h-8 text-emerald-400" />,
                 title: "Cutoff Analytics",
                 desc: "Explore interactive heatmaps and trend lines comparing 2023, 2024, and 2025 cutoffs.",
               },
               {
-                icon: <GraduationCap className="w-8 h-8 text-purple-400" />,
+                icon: <GraduationCap className="w-8 h-8 text-emerald-400" />,
                 title: "Branch Comparison",
                 desc: "Compare IT, CS, and AI/DS branches side-by-side to understand shifting industry demands.",
               },

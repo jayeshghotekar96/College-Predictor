@@ -243,3 +243,71 @@ input[type="range"]::-moz-range-thumb {
   animation: slideLeft 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
+/* --- PRINT STYLES --- */
+@media print {
+  body, html, #root, main, div, section {
+    background: transparent !important;
+    background-color: white !important;
+    color: black !important;
+    text-shadow: none !important;
+  }
+  
+  header, footer, nav, .no-print, [role="dialog"], button, .lucide, .ticket-tab {
+    display: none !important;
+  }
+  
+  .min-h-screen, .max-h-[75vh], .max-h-[70vh], .h-full, .overflow-auto, .overflow-hidden, .overflow-y-auto {
+    height: auto !important;
+    min-height: auto !important;
+    max-height: none !important;
+    overflow: visible !important;
+  }
+  
+  table {
+    width: 100% !important;
+    max-width: 100% !important;
+    border-collapse: collapse !important;
+    page-break-inside: auto !important;
+  }
+  tr {
+    page-break-inside: avoid !important;
+    page-break-after: auto !important;
+  }
+  thead {
+    display: table-header-group !important;
+  }
+  th, td {
+    color: black !important;
+    border: 1px solid #ccc !important;
+    padding: 6px !important;
+    background: white !important;
+    font-size: 11px !important;
+  }
+  
+  .glass-panel, .ticket-stub {
+    background: white !important;
+    border: 1px solid #ddd !important;
+    box-shadow: none !important;
+    color: black !important;
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+  }
+  
+  .text-white, .text-slate-100, .text-slate-200, .text-slate-300, .text-slate-400, .text-emerald-400, .text-emerald-300 {
+    color: black !important;
+  }
+
+  .print-section {
+    position: static !important;
+    width: 100% !important;
+    display: block !important;
+  }
+  
+  .print-hide {
+    display: none !important;
+  }
+  
+  body.print-option-form-only .predictor-main-content {
+    display: none !important;
+  }
+}

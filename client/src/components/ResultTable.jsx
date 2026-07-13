@@ -97,14 +97,14 @@ export const ResultTable = React.memo(function ResultTable({
 
   return (
     <div className="bg-slate-900/40 rounded-md border border-white/10 shadow-xs overflow-hidden">
-      <div ref={parentRef} className="max-h-[75vh] overflow-y-auto relative">
-        <table className="min-w-full divide-y divide-white/5 table-fixed">
+      <div ref={parentRef} className="max-h-[75vh] overflow-auto relative print-hide">
+        <table className="w-[600px] md:w-full min-w-full divide-y divide-white/5 table-fixed">
           {/* Sticky Header Row */}
           <thead className="bg-slate-900/95 backdrop-blur-md sticky top-0 z-20 border-b border-white/10 shadow-[0_4px_20px_rgba(0,0,0,0.3)]">
             <tr>
               <th
                 onClick={() => handleSort("code")}
-                className="w-24 px-4 py-3 text-left font-heading text-[10px] font-bold text-ink-muted uppercase tracking-wider cursor-pointer hover:bg-paper-cool/40 transition-colors select-none"
+                className="w-24 px-4 py-3 text-left font-heading text-[10px] font-bold text-ink-muted uppercase tracking-wider cursor-pointer hover:bg-paper-cool/40 transition-colors select-none hidden md:table-cell"
               >
                 Code <SortIndicator k="code" />
               </th>
@@ -122,7 +122,7 @@ export const ResultTable = React.memo(function ResultTable({
               </th>
               <th
                 onClick={() => handleSort("choice")}
-                className="w-36 px-4 py-3 text-left font-heading text-[10px] font-bold text-ink-muted uppercase tracking-wider cursor-pointer hover:bg-paper-cool/40 transition-colors select-none"
+                className="w-36 px-4 py-3 text-left font-heading text-[10px] font-bold text-ink-muted uppercase tracking-wider cursor-pointer hover:bg-paper-cool/40 transition-colors select-none hidden md:table-cell"
               >
                 Choice Code <SortIndicator k="choice" />
               </th>
@@ -135,7 +135,7 @@ export const ResultTable = React.memo(function ResultTable({
               >
                 Cutoff % <SortIndicator k="cutoff" />
               </th>
-              <th className="w-20 px-3 py-3 text-center font-heading text-[10px] font-bold text-ink-muted uppercase tracking-wider select-none">
+              <th className="w-20 px-3 py-3 text-center font-heading text-[10px] font-bold text-ink-muted uppercase tracking-wider select-none hidden md:table-cell">
                 Trend
               </th>
               <th
@@ -171,7 +171,7 @@ export const ResultTable = React.memo(function ResultTable({
                   }}
                 >
                   {/* College Code */}
-                  <td className="w-24 px-4 py-3 text-xs">
+                  <td className="w-24 px-4 py-3 text-xs hidden md:table-cell">
                     <span className="mono font-semibold text-slate-300 bg-white/5 px-1.5 py-0.5 rounded-sm border border-white/10">
                       {college.collegeCode}
                     </span>
@@ -194,7 +194,7 @@ export const ResultTable = React.memo(function ResultTable({
                   </td>
 
                   {/* Choice Code with copy icon */}
-                  <td className="w-36 px-4 py-3 text-xs">
+                  <td className="w-36 px-4 py-3 text-xs hidden md:table-cell">
                     <span className="group/choice relative inline-flex items-center gap-1.5">
                       <span className="mono font-bold text-slate-200 bg-white/5 px-1.5 py-0.5 rounded-sm border border-white/10">
                         {branch.choiceCode}
@@ -250,7 +250,7 @@ export const ResultTable = React.memo(function ResultTable({
                   </td>
 
                   {/* 3yr Trend Sparkline */}
-                  <td className="w-20 px-3 py-3 text-center text-xs">
+                  <td className="w-20 px-3 py-3 text-center text-xs hidden md:table-cell">
                     <Sparkline
                       cutoffs={branch.cutoffs}
                       category={res.appliedCategory || category}
@@ -358,6 +358,35 @@ export const ResultTable = React.memo(function ResultTable({
                 </tr>
               );
             })}
+          </tbody>
+        </table>
+      </div>
+
+      {/* Printable Table (Hidden on Screen, Visible on Print) */}
+      <div className="hidden print:block w-full text-black bg-white">
+        <h2 className="text-xl font-bold mb-4 border-b border-black pb-2 text-black">MHT-CET Admission Predictor Results</h2>
+        <table className="w-full text-left text-xs border-collapse">
+          <thead>
+            <tr>
+              <th className="border border-black p-2 bg-gray-100 font-bold">Code</th>
+              <th className="border border-black p-2 bg-gray-100 font-bold">College Name</th>
+              <th className="border border-black p-2 bg-gray-100 font-bold">Branch</th>
+              <th className="border border-black p-2 bg-gray-100 font-bold">Cat</th>
+              <th className="border border-black p-2 bg-gray-100 font-bold">Cutoff</th>
+              <th className="border border-black p-2 bg-gray-100 font-bold">Chance</th>
+            </tr>
+          </thead>
+          <tbody>
+            {sortedResults.map((res) => (
+              <tr key={`${res.college.collegeCode}-${res.branch.choiceCode}`}>
+                <td className="border border-black p-2">{res.college.collegeCode}</td>
+                <td className="border border-black p-2 font-semibold">{res.college.collegeName}</td>
+                <td className="border border-black p-2">{res.branch.courseName}</td>
+                <td className="border border-black p-2">{category}</td>
+                <td className="border border-black p-2">{res.latestCutoff.toFixed(2)}%</td>
+                <td className="border border-black p-2 font-bold">{res.chance}</td>
+              </tr>
+            ))}
           </tbody>
         </table>
       </div>

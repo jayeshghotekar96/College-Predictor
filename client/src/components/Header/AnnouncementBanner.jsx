@@ -13,12 +13,12 @@ export function AnnouncementBanner() {
           initial={{ height: 0, opacity: 0 }}
           animate={{ height: "auto", opacity: 1 }}
           exit={{ height: 0, opacity: 0 }}
-          className="relative bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 text-white overflow-hidden"
+          className="relative bg-gradient-to-r from-emerald-600 via-emerald-600 to-emerald-600 text-white overflow-hidden"
         >
           {/* Animated Background Elements */}
           <div className="absolute inset-0 overflow-hidden pointer-events-none">
             <div className="absolute -top-4 -left-4 w-24 h-24 bg-white/20 rounded-full blur-2xl animate-pulse" />
-            <div className="absolute top-0 right-1/4 w-32 h-32 bg-cyan-400/20 rounded-full blur-3xl animate-pulse delay-700" />
+            <div className="absolute top-0 right-1/4 w-32 h-32 bg-emerald-400/20 rounded-full blur-3xl animate-pulse delay-700" />
           </div>
 
           <div className="max-w-7xl mx-auto px-6 py-2.5 flex items-center justify-between relative z-10">
@@ -33,7 +33,7 @@ export function AnnouncementBanner() {
               </span>
               <Link
                 to="/predict"
-                className="hidden md:flex items-center gap-1 text-white hover:text-cyan-200 underline underline-offset-4 decoration-white/40 transition-colors font-bold"
+                className="hidden md:flex items-center gap-1 text-white hover:text-emerald-200 underline underline-offset-4 decoration-white/40 transition-colors font-bold"
               >
                 Explore Now <ArrowRight className="w-4 h-4" />
               </Link>

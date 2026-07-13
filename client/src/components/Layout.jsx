@@ -5,7 +5,7 @@ import { Header } from "./Header/Header";
 
 export function Layout() {
   return (
-    <div className="min-h-screen relative flex flex-col bg-slate-900 text-slate-100 font-sans">
+    <div className="min-h-screen w-full overflow-x-hidden relative flex flex-col bg-slate-900 text-slate-100 font-sans">
       {/* Premium Header System */}
       <AnnouncementBanner />
       <Header />

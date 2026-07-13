@@ -7,11 +7,11 @@ import { SearchForm } from "../components/SearchForm";
 import { ResultCard } from "../components/ResultCard";
 import { ShortlistPanel } from "../components/ShortlistPanel";
 import { ReversePredictor } from "../components/ReversePredictor";
-import { CompetitivenessHeatmap } from "../components/CompetitivenessHeatmap";
+const CompetitivenessHeatmap = React.lazy(() => import("../components/CompetitivenessHeatmap").then(m => ({ default: m.CompetitivenessHeatmap })));
 import { ResultTable } from "../components/ResultTable";
 import { OptionFormPanel } from "../components/OptionFormPanel";
 import { useOptionForm } from "../hooks/useOptionForm";
-
+import { PredictorSkeleton } from "../components/skeletons/PredictorSkeleton";
 const DEFAULT_FILTERS = {
   percentile: 90.0,
   category: "GOPENS",
@@ -187,21 +187,8 @@ export function PredictorPage() {
   };
 
   if (loading) {
-    return (
-      <div className="flex-1 flex items-center justify-center bg-slate-900">
-        <div className="text-center">
-          <div className="w-12 h-12 border-4 border-slate-700 border-t-emerald-500 rounded-full animate-spin mx-auto mb-4" />
-          <p className="font-heading text-slate-200 text-lg font-bold">
-            Loading Admission Cutoffs...
-          </p>
-          <p className="text-slate-400 text-xs mt-1">
-            Parsing historical rounds (2023–2025)
-          </p>
-        </div>
-      </div>
-    );
+    return <PredictorSkeleton />;
   }
-
   if (error) {
     return (
       <div className="flex-1 flex items-center justify-center bg-slate-900">
@@ -244,7 +231,7 @@ export function PredictorPage() {
   };
 
   return (
-    <div className="w-full relative flex-1 flex flex-col">
+    <div className="w-full relative flex-1 flex flex-col predictor-main-content">
       {/* Tab Navigation Menu */}
       <nav className="glass-panel px-6 relative z-10 border-b border-white/10 shadow-xs mb-8">
         <div className="max-w-7xl mx-auto flex gap-6">
@@ -335,28 +322,40 @@ export function PredictorPage() {
                   </select>
                 </div>
 
-                {/* View Mode Toggle */}
-                <div className="flex border border-white/10 rounded-lg overflow-hidden p-1 bg-black/20">
+                {/* View Mode Toggle & Print */}
+                <div className="flex items-center gap-2">
                   <button
-                    onClick={() => setDisplayMode("card")}
-                    className={`text-[10px] uppercase tracking-wider font-heading font-bold px-3 py-1.5 rounded-md transition-all cursor-pointer ${
-                      displayMode === "card"
-                        ? "bg-white/10 text-white shadow-sm"
-                        : "text-slate-400 hover:text-white"
-                    }`}
+                    onClick={() => window.print()}
+                    className="hidden sm:flex items-center gap-1.5 text-[10px] uppercase tracking-wider font-heading font-bold px-3 py-1.5 rounded-lg transition-all cursor-pointer bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 hover:text-white"
+                    title="Print Results"
                   >
-                    🎴 Cards
+                    <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+                    </svg>
+                    Print
                   </button>
-                  <button
-                    onClick={() => setDisplayMode("table")}
-                    className={`text-[10px] uppercase tracking-wider font-heading font-bold px-3 py-1.5 rounded-md transition-all cursor-pointer ${
-                      displayMode === "table"
-                        ? "bg-white/10 text-white shadow-sm"
-                        : "text-slate-400 hover:text-white"
-                    }`}
-                  >
-                    📊 Table
-                  </button>
+                  <div className="flex border border-white/10 rounded-lg overflow-hidden p-1 bg-black/20">
+                    <button
+                      onClick={() => setDisplayMode("card")}
+                      className={`text-[10px] uppercase tracking-wider font-heading font-bold px-3 py-1.5 rounded-md transition-all cursor-pointer ${
+                        displayMode === "card"
+                          ? "bg-white/10 text-white shadow-sm"
+                          : "text-slate-400 hover:text-white"
+                      }`}
+                    >
+                      🎴 Cards
+                    </button>
+                    <button
+                      onClick={() => setDisplayMode("table")}
+                      className={`text-[10px] uppercase tracking-wider font-heading font-bold px-3 py-1.5 rounded-md transition-all cursor-pointer ${
+                        displayMode === "table"
+                          ? "bg-white/10 text-white shadow-sm"
+                          : "text-slate-400 hover:text-white"
+                      }`}
+                    >
+                      📊 Table
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
@@ -367,7 +366,7 @@ export function PredictorPage() {
                 <div>
                   <h2 className="font-heading text-lg font-bold text-white flex items-center gap-2">
                     <span>Admission Predictions</span>
-                    <span className="mono text-xs font-bold bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 px-2 py-0.5 rounded-full">
+                    <span className="mono text-xs font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 px-2 py-0.5 rounded-full">
                       {isPredicting ? "Loading..." : `${totalResultsCount} Matches`}
                     </span>
                   </h2>
@@ -689,13 +688,15 @@ export function PredictorPage() {
 
         {/* TAB 3: Heatmap Table view */}
         {activeTab === "heatmap" && (
-          <CompetitivenessHeatmap
-            colleges={data.colleges}
-            category={filters.category}
-            allBranches={allBranches}
-            allDistricts={allDistricts}
-            onCellClick={handleHeatmapCellClick}
-          />
+          <React.Suspense fallback={<Skeleton className="w-full h-[600px] rounded-2xl" />}>
+            <CompetitivenessHeatmap
+              colleges={data.colleges}
+              category={filters.category}
+              allBranches={allBranches}
+              allDistricts={allDistricts}
+              onCellClick={handleHeatmapCellClick}
+            />
+          </React.Suspense>
         )}
       </div>
 

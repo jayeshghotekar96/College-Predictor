@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useData } from "../lib/DataContext";
 import { ProbabilityMeter } from "./ProbabilityMeter";
 
@@ -22,6 +22,15 @@ export function OptionFormPanel({
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
+
+  useEffect(() => {
+    if (isOpen) {
+      document.body.classList.add("print-option-form-only");
+    } else {
+      document.body.classList.remove("print-option-form-only");
+    }
+    return () => document.body.classList.remove("print-option-form-only");
+  }, [isOpen]);
 
   const handleExportPDF = () => {
     window.print();
@@ -78,9 +87,8 @@ export function OptionFormPanel({
             className="absolute inset-0 bg-ink/40 backdrop-blur-xs transition-opacity duration-300"
             onClick={() => setIsOpen(false)}
           />
-
           <div className="absolute inset-y-0 right-0 max-w-full pl-10 flex">
-            <div className="w-screen max-w-lg glass-panel flex flex-col shadow-xl animate-slideLeft">
+            <div className="w-screen max-w-lg glass-panel flex flex-col shadow-xl animate-slideLeft print-section-wrapper">
               {/* Header */}
               <div className="bg-ink text-paper px-6 py-5 flex items-center justify-between">
                 <div>
@@ -146,17 +154,6 @@ export function OptionFormPanel({
                   </div>
                 ) : (
                   <div className="flex flex-col gap-3 print-section">
-                    <style>{`
-                      @media print {
-                        body * { visibility: hidden; }
-                        .print-section, .print-section * { visibility: visible; }
-                        .print-section { position: absolute; left: 0; top: 0; width: 100%; color: black; background: white; }
-                        .glass-panel { background: white !important; color: black !important; border: none; }
-                        .text-white { color: black !important; }
-                        .text-white\\/50 { color: #666 !important; }
-                        button { display: none !important; }
-                      }
-                    `}</style>
                     {optionForm.map((item, idx) => {
                       // Use cutoff from item if available
                       const latestCutoff = item.latestCutoff || 0;
@@ -315,7 +312,7 @@ export function OptionFormPanel({
                 <button
                   onClick={handleExportPDF}
                   disabled={optionForm.length === 0}
-                  className="flex-1 flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-500 text-white font-heading font-bold text-xs uppercase tracking-wider py-3 px-4 rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="flex-1 flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-500 text-white font-heading font-bold text-xs uppercase tracking-wider py-3 px-4 rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <svg
                     xmlns="http://www.w3.org/2000/svg"

@@ -24,12 +24,12 @@ export function Calculator() {
     <div className="max-w-4xl mx-auto space-y-8 animate-fadeIn mt-8 mb-20 px-4 md:px-0">
       {/* Page Header */}
       <div className="bg-white/5 rounded-2xl border border-white/10 p-8 relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-500/20 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
+        <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-500/20 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
 
         <div className="relative z-10">
           <div className="flex items-center gap-3 mb-4">
-            <div className="w-12 h-12 rounded-xl bg-indigo-500/20 flex items-center justify-center border border-indigo-500/30">
-              <CalcIcon className="w-6 h-6 text-indigo-400" />
+            <div className="w-12 h-12 rounded-xl bg-emerald-500/20 flex items-center justify-center border border-emerald-500/30">
+              <CalcIcon className="w-6 h-6 text-emerald-400" />
             </div>
             <div>
               <h1 className="text-3xl font-heading font-extrabold text-white">
@@ -63,7 +63,7 @@ export function Calculator() {
                   max="100"
                   value={percentile}
                   onChange={(e) => setPercentile(e.target.value)}
-                  className="w-full bg-black/30 border border-white/10 rounded-xl px-4 py-3 text-white text-lg font-mono focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all outline-none"
+                  className="w-full bg-black/30 border border-white/10 rounded-xl px-4 py-3 text-white text-lg font-mono focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all outline-none"
                   placeholder="e.g. 95.50"
                 />
 
@@ -84,7 +84,7 @@ export function Calculator() {
                   onChange={(e) =>
                     setTotalStudents(parseInt(e.target.value) || 0)
                   }
-                  className="w-full bg-black/30 border border-white/10 rounded-xl px-4 py-3 text-white text-lg font-mono focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all outline-none"
+                  className="w-full bg-black/30 border border-white/10 rounded-xl px-4 py-3 text-white text-lg font-mono focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all outline-none"
                 />
 
                 <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none">
@@ -99,11 +99,11 @@ export function Calculator() {
         </div>
 
         {/* Results Card */}
-        <div className="bg-indigo-900/20 rounded-2xl border border-indigo-500/20 p-6 flex flex-col items-center justify-center text-center relative overflow-hidden backdrop-blur-md">
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full bg-indigo-500/10 blur-3xl rounded-full" />
+        <div className="bg-emerald-900/20 rounded-2xl border border-emerald-500/20 p-6 flex flex-col items-center justify-center text-center relative overflow-hidden backdrop-blur-md">
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full bg-emerald-500/10 blur-3xl rounded-full" />
 
           <div className="relative z-10 w-full">
-            <h3 className="text-sm font-semibold text-indigo-300 uppercase tracking-widest mb-2">
+            <h3 className="text-sm font-semibold text-emerald-300 uppercase tracking-widest mb-2">
               Estimated State Rank
             </h3>
 
@@ -113,16 +113,16 @@ export function Calculator() {
               animate={{ scale: 1, opacity: 1 }}
               className="text-6xl md:text-7xl font-mono font-extrabold text-white my-6 drop-shadow-xl flex items-center justify-center gap-2"
             >
-              <span className="text-indigo-400">#</span>
+              <span className="text-emerald-400">#</span>
               {estimatedRank.toLocaleString()}
             </motion.div>
 
-            <div className="grid grid-cols-2 gap-4 mt-8 pt-6 border-t border-indigo-500/20 w-full">
+            <div className="grid grid-cols-2 gap-4 mt-8 pt-6 border-t border-emerald-500/20 w-full">
               <div className="text-left">
-                <div className="text-xs text-indigo-300/70 mb-1">
+                <div className="text-xs text-emerald-300/70 mb-1">
                   Top Percentile
                 </div>
-                <div className="font-mono text-lg font-bold text-indigo-200">
+                <div className="font-mono text-lg font-bold text-emerald-200">
                   {parsedPercentile > 0
                     ? (100 - parsedPercentile).toFixed(2)
                     : "0"}
@@ -130,7 +130,7 @@ export function Calculator() {
                 </div>
               </div>
               <div className="text-right">
-                <div className="text-xs text-indigo-300/70 mb-1">
+                <div className="text-xs text-emerald-300/70 mb-1">
                   Prediction Quality
                 </div>
                 <div className="font-heading text-sm font-bold text-emerald-400 flex items-center justify-end gap-1">
@@ -146,7 +146,7 @@ export function Calculator() {
       <div className="text-center pt-4">
         <Link
           to={`/predict?percentile=${parsedPercentile}`}
-          className="inline-flex items-center gap-2 bg-indigo-600 hover:bg-indigo-500 text-white font-bold px-8 py-4 rounded-xl shadow-lg shadow-indigo-500/20 transition-all hover:scale-105 active:scale-95"
+          className="inline-flex items-center gap-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-8 py-4 rounded-xl shadow-lg shadow-indigo-500/20 transition-all hover:scale-105 active:scale-95"
         >
           View College Predictions for {parsedPercentile}%
           <TrendingUp className="w-5 h-5" />

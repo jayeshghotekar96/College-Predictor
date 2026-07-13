@@ -39,9 +39,9 @@ export function Footer() {
   return (
     <footer className="relative bg-[#0B1120] overflow-hidden pt-20 pb-10 border-t border-white/10 mt-20">
       {/* Background Ambient Glows */}
-      <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-indigo-500/50 to-transparent opacity-60" />
-      <div className="absolute top-1/4 left-0 w-[500px] h-[500px] bg-blue-600/10 rounded-full blur-[120px] pointer-events-none mix-blend-screen" />
-      <div className="absolute bottom-0 right-0 w-[500px] h-[500px] bg-purple-600/10 rounded-full blur-[120px] pointer-events-none mix-blend-screen" />
+      <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-emerald-500/50 to-transparent opacity-60" />
+      <div className="absolute top-1/4 left-0 w-[500px] h-[500px] bg-emerald-600/10 rounded-full blur-[120px] pointer-events-none mix-blend-screen" />
+      <div className="absolute bottom-0 right-0 w-[500px] h-[500px] bg-emerald-600/10 rounded-full blur-[120px] pointer-events-none mix-blend-screen" />
 
       <div className="max-w-7xl mx-auto px-6 relative z-10">
         {/* Main Footer Links */}
@@ -59,7 +59,7 @@ export function Footer() {
               onClick={scrollToTop}
               className="flex flex-col mb-5 group inline-flex"
             >
-              <span className="font-heading text-3xl font-black tracking-tighter bg-gradient-to-r from-blue-400 via-indigo-400 to-purple-400 text-transparent bg-clip-text group-hover:opacity-80 transition-opacity">
+              <span className="font-heading text-3xl font-black tracking-tighter bg-gradient-to-r from-emerald-400 via-emerald-400 to-emerald-400 text-transparent bg-clip-text group-hover:opacity-80 transition-opacity">
                 CAP Predictor
               </span>
               <span className="text-xs text-emerald-400 font-mono tracking-widest font-semibold uppercase mt-1">
@@ -75,10 +75,10 @@ export function Footer() {
             {/* Miniature Stats */}
             <div className="flex flex-wrap items-center gap-4 text-xs font-mono text-slate-500">
               <div className="flex items-center gap-1.5">
-                <Database className="w-3.5 h-3.5 text-blue-400" /> 384+ Colleges
+                <Database className="w-3.5 h-3.5 text-emerald-400" /> 384+ Colleges
               </div>
               <div className="flex items-center gap-1.5">
-                <Users className="w-3.5 h-3.5 text-purple-400" /> 95+
+                <Users className="w-3.5 h-3.5 text-emerald-400" /> 95+
                 Reservation Categories
               </div>
               <div className="flex items-center gap-1.5">
@@ -111,7 +111,7 @@ export function Footer() {
                     onClick={scrollToTop}
                     className="text-slate-400 hover:text-white text-sm transition-colors flex items-center gap-2 group"
                   >
-                    <ChevronRight className="w-3 h-3 text-slate-600 group-hover:text-blue-400 transition-colors" />
+                    <ChevronRight className="w-3 h-3 text-slate-600 group-hover:text-emerald-400 transition-colors" />
                     {link.name}
                   </Link>
                 </li>
@@ -140,7 +140,7 @@ export function Footer() {
                     onClick={scrollToTop}
                     className="text-slate-400 hover:text-white text-sm transition-colors flex items-center gap-2 group"
                   >
-                    <ChevronRight className="w-3 h-3 text-slate-600 group-hover:text-purple-400 transition-colors" />
+                    <ChevronRight className="w-3 h-3 text-slate-600 group-hover:text-emerald-400 transition-colors" />
                     {link.name}
                   </Link>
                 </li>
@@ -172,7 +172,7 @@ export function Footer() {
                   href="https://github.com/"
                   target="_blank"
                   rel="noreferrer"
-                  className="w-8 h-8 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-slate-400 hover:text-white hover:border-blue-500 hover:bg-blue-500/20 hover:shadow-[0_0_15px_rgba(59,130,246,0.4)] transition-all"
+                  className="w-8 h-8 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-slate-400 hover:text-white hover:border-emerald-500 hover:bg-emerald-500/20 hover:shadow-[0_0_15px_rgba(16,185,129,0.4)] transition-all"
                   aria-label="GitHub"
                 >
                   <Code className="w-4 h-4" />
@@ -181,14 +181,14 @@ export function Footer() {
                   href="https://linkedin.com/"
                   target="_blank"
                   rel="noreferrer"
-                  className="w-8 h-8 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-slate-400 hover:text-white hover:border-blue-500 hover:bg-blue-600/20 hover:shadow-[0_0_15px_rgba(37,99,235,0.4)] transition-all"
+                  className="w-8 h-8 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-slate-400 hover:text-white hover:border-emerald-500 hover:bg-emerald-600/20 hover:shadow-[0_0_15px_rgba(16,185,129,0.4)] transition-all"
                   aria-label="LinkedIn"
                 >
                   <Briefcase className="w-4 h-4" />
                 </a>
                 <a
                   href="mailto:contact@example.com"
-                  className="w-8 h-8 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-slate-400 hover:text-white hover:border-purple-500 hover:bg-purple-500/20 hover:shadow-[0_0_15px_rgba(168,85,247,0.4)] transition-all"
+                  className="w-8 h-8 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-slate-400 hover:text-white hover:border-emerald-500 hover:bg-emerald-500/20 hover:shadow-[0_0_15px_rgba(168,85,247,0.4)] transition-all"
                   aria-label="Email"
                 >
                   <Mail className="w-4 h-4" />
@@ -226,13 +226,13 @@ export function Footer() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="Enter your email address..."
-                  className="w-full bg-white/5 border border-white/10 px-4 py-2.5 pr-28 rounded-lg text-sm text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 focus:bg-white/10 transition-all"
+                  className="w-full bg-white/5 border border-white/10 px-4 py-2.5 pr-28 rounded-lg text-sm text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500 focus:bg-white/10 transition-all"
                   required
                 />
 
                 <button
                   type="submit"
-                  className="absolute right-1.5 px-3 py-1 bg-blue-600 hover:bg-blue-500 rounded text-xs font-semibold text-white transition-colors cursor-pointer"
+                  className="absolute right-1.5 px-3 py-1 bg-emerald-600 hover:bg-emerald-500 rounded text-xs font-semibold text-white transition-colors cursor-pointer"
                 >
                   Subscribe
                 </button>

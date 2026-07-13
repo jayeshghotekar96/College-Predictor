@@ -14,6 +14,8 @@ import {
   ChevronRight,
   TrendingUp,
 } from "lucide-react";
+import { CollegeDetailsSkeleton } from "../components/skeletons/CollegeDetailsSkeleton";
+import { SkeletonFade } from "../components/ui/Skeleton";
 
 export function CollegeDetails() {
   const { code } = useParams();
@@ -43,12 +45,9 @@ export function CollegeDetails() {
     };
   }, [code]);
 
-  if (loading)
-    return (
-      <div className="flex-1 flex items-center justify-center text-slate-400">
-        Loading details...
-      </div>
-    );
+  if (loading) {
+    return <CollegeDetailsSkeleton />;
+  }
   if (error)
     return (
       <div className="flex-1 flex items-center justify-center text-red-400">
@@ -65,11 +64,11 @@ export function CollegeDetails() {
   return (
     <div className="flex-1 w-full bg-slate-900 pb-20">
       {/* Hero Section */}
-      <div className="relative bg-gradient-to-b from-blue-900/40 to-slate-900 border-b border-white/5 pt-16 pb-12 overflow-hidden">
+      <div className="relative bg-gradient-to-b from-emerald-900/40 to-slate-900 border-b border-white/5 pt-16 pb-12 overflow-hidden">
         {/* Background Patterns */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none opacity-20">
-          <div className="absolute top-0 right-0 w-96 h-96 bg-blue-500 rounded-full blur-[100px] -translate-y-1/2 translate-x-1/2" />
-          <div className="absolute bottom-0 left-0 w-96 h-96 bg-indigo-500 rounded-full blur-[100px] translate-y-1/2 -translate-x-1/2" />
+          <div className="absolute top-0 right-0 w-96 h-96 bg-emerald-500 rounded-full blur-[100px] -translate-y-1/2 translate-x-1/2" />
+          <div className="absolute bottom-0 left-0 w-96 h-96 bg-emerald-500 rounded-full blur-[100px] translate-y-1/2 -translate-x-1/2" />
         </div>
 
         <div className="max-w-7xl mx-auto px-6 relative z-10">
@@ -84,7 +83,7 @@ export function CollegeDetails() {
             <ChevronRight className="w-3 h-3" />
             <span className="text-white">{college.district}</span>
             <ChevronRight className="w-3 h-3" />
-            <span className="text-blue-400">{college.collegeCode}</span>
+            <span className="text-emerald-400">{college.collegeCode}</span>
           </div>
 
           <div className="flex flex-col md:flex-row md:items-start justify-between gap-6">
@@ -93,12 +92,12 @@ export function CollegeDetails() {
                 <span className="px-3 py-1 bg-white/10 rounded-lg text-sm font-mono font-bold text-slate-200 border border-white/10">
                   Code: {college.collegeCode}
                 </span>
-                {college.collegeName.toLowerCase().includes("autonomous") && (
-                  <span className="px-3 py-1 bg-purple-500/20 rounded-lg text-sm font-semibold text-purple-300 border border-purple-500/30 flex items-center gap-1">
+                {college.collegeName?.toLowerCase().includes("autonomous") && (
+                  <span className="px-3 py-1 bg-emerald-500/20 rounded-lg text-sm font-semibold text-emerald-300 border border-emerald-500/30 flex items-center gap-1">
                     <GraduationCap className="w-4 h-4" /> Autonomous
                   </span>
                 )}
-                {college.collegeName.toLowerCase().includes("government") && (
+                {college.collegeName?.toLowerCase().includes("government") && (
                   <span className="px-3 py-1 bg-emerald-500/20 rounded-lg text-sm font-semibold text-emerald-300 border border-emerald-500/30">
                     Government
                   </span>
@@ -114,18 +113,18 @@ export function CollegeDetails() {
                   {college.district}, Maharashtra
                 </span>
                 <span className="flex items-center gap-1.5 bg-black/40 px-3 py-1.5 rounded-lg border border-white/5">
-                  <BookOpen className="w-4 h-4 text-blue-400" />{" "}
-                  {college.branches.length} Branches Offered
+                  <BookOpen className="w-4 h-4 text-emerald-400" />{" "}
+                  {college.branches?.length || 0} Branches Offered
                 </span>
                 <span className="flex items-center gap-1.5 bg-black/40 px-3 py-1.5 rounded-lg border border-white/5">
-                  <Target className="w-4 h-4 text-indigo-400" /> NAAC / NBA
+                  <Target className="w-4 h-4 text-emerald-400" /> NAAC / NBA
                   Accredited (Est.)
                 </span>
               </div>
             </div>
 
             <div className="shrink-0 flex flex-row md:flex-col gap-3">
-              <button className="flex-1 bg-blue-600 hover:bg-blue-500 text-white px-6 py-3 rounded-xl font-bold shadow-[0_0_20px_rgba(37,99,235,0.4)] transition-all flex items-center justify-center gap-2">
+              <button className="flex-1 bg-emerald-600 hover:bg-emerald-500 text-white px-6 py-3 rounded-xl font-bold shadow-[0_0_20px_rgba(16,185,129,0.4)] transition-all flex items-center justify-center gap-2">
                 Predict My Chances
               </button>
               <button className="flex-1 bg-white/10 hover:bg-white/20 text-white px-6 py-3 rounded-xl font-semibold border border-white/10 transition-all flex items-center justify-center gap-2">
@@ -143,7 +142,7 @@ export function CollegeDetails() {
           <div className="glass-panel p-6 md:p-8 rounded-2xl border border-white/10">
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-2xl font-heading font-bold text-white flex items-center gap-2">
-                <BookOpen className="w-6 h-6 text-blue-400" /> Branch Offerings
+                <BookOpen className="w-6 h-6 text-emerald-400" /> Branch Offerings
                 & Cutoffs
               </h2>
               <span className="text-xs font-semibold text-slate-400 bg-black/40 px-3 py-1 rounded-full border border-white/5">
@@ -152,10 +151,11 @@ export function CollegeDetails() {
             </div>
 
             <div className="space-y-4">
-              {college.branches.map((branch) => {
+              {college.branches?.map((branch) => {
+                const cutoffs = branch.cutoffs || [];
                 const bestOpenCategory =
-                  getBestMatchingCategory(branch.cutoffs, "GOPENS") || "GOPENS";
-                const gopensCutoffs = branch.cutoffs.filter(
+                  getBestMatchingCategory(cutoffs, "GOPENS") || "GOPENS";
+                const gopensCutoffs = cutoffs.filter(
                   (c) => c.category === bestOpenCategory,
                 );
                 const latestYear =
@@ -173,7 +173,7 @@ export function CollegeDetails() {
                   >
                     <div>
                       <div className="flex items-center gap-2 mb-1">
-                        <span className="text-xs font-mono font-bold text-blue-400 bg-blue-400/10 px-2 py-0.5 rounded border border-blue-400/20">
+                        <span className="text-xs font-mono font-bold text-emerald-400 bg-emerald-400/10 px-2 py-0.5 rounded border border-emerald-400/20">
                           {branch.choiceCode}
                         </span>
                       </div>
@@ -229,8 +229,8 @@ export function CollegeDetails() {
               </div>
               <div className="flex items-center gap-3">
                 <Globe className="w-5 h-5 text-slate-500 shrink-0" />
-                <a href="#" className="text-blue-400 hover:underline">
-                  www.{college.district.toLowerCase()}engg.ac.in
+                <a href="#" className="text-emerald-400 hover:underline">
+                  www.{college.district?.toLowerCase()}engg.ac.in
                 </a>
               </div>
               <div className="flex items-center gap-3">
@@ -241,7 +241,7 @@ export function CollegeDetails() {
                 <Mail className="w-5 h-5 text-slate-500 shrink-0" />
                 <a
                   href="mailto:info@college.edu"
-                  className="text-blue-400 hover:underline"
+                  className="text-emerald-400 hover:underline"
                 >
                   info@college.edu
                 </a>

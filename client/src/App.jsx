@@ -1,6 +1,8 @@
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
 import React, { Suspense } from "react";
+import { AnimatePresence } from "framer-motion";
 import { Layout } from "./components/Layout";
+import { PageTransition } from "./components/ui/PageTransition";
 
 const PredictorPage = React.lazy(() => import("./pages/Predictor").then(module => ({ default: module.PredictorPage })));
 const LandingPage = React.lazy(() => import("./pages/Landing").then(module => ({ default: module.LandingPage })));
@@ -21,22 +23,32 @@ const Loader = () => (
   </div>
 );
 
+function AnimatedRoutes() {
+  const location = useLocation();
+  
+  return (
+    <AnimatePresence mode="wait">
+      <Routes location={location} key={location.pathname}>
+        <Route path="/" element={<Layout />}>
+          <Route index element={<PageTransition><LandingPage /></PageTransition>} />
+          <Route path="predict" element={<PageTransition><PredictorPage /></PageTransition>} />
+          <Route path="colleges" element={<PageTransition><CollegeExplorer /></PageTransition>} />
+          <Route path="colleges/:code" element={<PageTransition><CollegeDetails /></PageTransition>} />
+          <Route path="analytics/calculator" element={<PageTransition><Calculator /></PageTransition>} />
+          <Route path="option-form" element={<PageTransition><OptionFormBuilder /></PageTransition>} />
+          <Route path="dashboard" element={<PageTransition><Dashboard /></PageTransition>} />
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Route>
+      </Routes>
+    </AnimatePresence>
+  );
+}
+
 function App() {
   return (
     <BrowserRouter>
       <Suspense fallback={<Loader />}>
-        <Routes>
-          <Route path="/" element={<Layout />}>
-            <Route index element={<LandingPage />} />
-            <Route path="predict" element={<PredictorPage />} />
-            <Route path="colleges" element={<CollegeExplorer />} />
-            <Route path="colleges/:code" element={<CollegeDetails />} />
-            <Route path="analytics/calculator" element={<Calculator />} />
-            <Route path="option-form" element={<OptionFormBuilder />} />
-            <Route path="dashboard" element={<Dashboard />} />
-            <Route path="*" element={<Navigate to="/" replace />} />
-          </Route>
-        </Routes>
+        <AnimatedRoutes />
       </Suspense>
     </BrowserRouter>
   );

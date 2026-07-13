@@ -1,6 +1,10 @@
 import React, { useState, useMemo, useRef, useDeferredValue } from "react";
 import { useData } from "../lib/DataContext";
-import { Link, useSearchParams } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
+import { PrefetchLink } from "../components/ui/PrefetchLink";
+import { CollegeCardSkeleton } from "../components/skeletons/CollegeCardSkeleton";
+import { SkeletonFade } from "../components/ui/Skeleton";
+import { motion } from "framer-motion";
 import {
   Building2,
   MapPin,
@@ -72,14 +76,7 @@ export function CollegeExplorer() {
     overscan: 5,
   });
 
-  if (loading) {
-    return (
-      <div className="flex-1 flex items-center justify-center text-slate-400">
-        Loading colleges...
-      </div>
-    );
-  }
-  if (error || !data) {
+  if (error) {
     return (
       <div className="flex-1 flex items-center justify-center text-red-400">
         Error loading data.
@@ -96,7 +93,7 @@ export function CollegeExplorer() {
             College Explorer
           </h1>
           <p className="text-slate-400 max-w-2xl mx-auto">
-            Browse through {data.colleges.length} engineering institutions in
+            Browse through {data?.colleges?.length || 0} engineering institutions in
             Maharashtra. Discover top colleges and analyze cutoff trends.
           </p>
         </div>
@@ -107,7 +104,7 @@ export function CollegeExplorer() {
         <div className="w-full md:w-64 shrink-0 space-y-6 overflow-y-auto pr-2 custom-scrollbar">
           <div className="glass-panel p-5 rounded-2xl border border-white/10">
             <h2 className="font-heading font-bold text-white mb-4 flex items-center gap-2">
-              <Filter className="w-4 h-4 text-blue-400" /> Filters
+              <Filter className="w-4 h-4 text-emerald-400" /> Filters
             </h2>
 
             <div className="space-y-4">
@@ -150,7 +147,7 @@ export function CollegeExplorer() {
                       }}
                       className={`text-left px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
                         typeFilter === type
-                          ? "bg-blue-500/20 text-blue-400 border border-blue-500/30"
+                          ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30"
                           : "text-slate-300 hover:bg-white/5 border border-transparent"
                       }`}
                     >
@@ -193,14 +190,26 @@ export function CollegeExplorer() {
             ref={parentRef}
             className="flex-1 overflow-y-auto custom-scrollbar relative pr-2"
           >
-            {filteredColleges.length > 0 ? (
-              <div
-                style={{
-                  height: `${virtualizer.getTotalSize()}px`,
-                  width: "100%",
-                  position: "relative",
-                }}
-              >
+            <SkeletonFade 
+              loading={loading}
+              skeleton={
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {[...Array(6)].map((_, i) => (
+                    <div key={i} className="h-[140px]">
+                      <CollegeCardSkeleton />
+                    </div>
+                  ))}
+                </div>
+              }
+            >
+              {filteredColleges.length > 0 ? (
+                <div
+                  style={{
+                    height: `${virtualizer.getTotalSize()}px`,
+                    width: "100%",
+                    position: "relative",
+                  }}
+                >
                 {virtualizer.getVirtualItems().map((virtualRow) => {
                   const college = filteredColleges[virtualRow.index];
                   return (
@@ -216,13 +225,13 @@ export function CollegeExplorer() {
                         paddingBottom: "1rem", // gap replacement
                       }}
                     >
-                      <Link
+                      <PrefetchLink
                         to={`/colleges/${college.collegeCode}`}
-                        className="block glass-panel p-5 rounded-2xl border border-white/10 hover:border-blue-500/30 hover:bg-blue-500/5 transition-all group h-full flex flex-col justify-between"
+                        className="block glass-panel p-5 rounded-2xl border border-white/10 hover:border-emerald-500/30 hover:bg-emerald-500/5 transition-all group h-full flex flex-col justify-between"
                       >
-                        <div>
+                        <motion.div whileTap={{ scale: 0.98 }} className="h-full flex flex-col">
                           <div className="flex items-start justify-between gap-2 mb-3">
-                            <h3 className="font-bold text-white group-hover:text-blue-400 transition-colors leading-tight">
+                            <h3 className="font-bold text-white group-hover:text-emerald-400 transition-colors leading-tight">
                               {college.collegeName}
                             </h3>
                             <span className="shrink-0 text-xs font-mono font-bold px-2 py-0.5 bg-white/10 text-slate-300 rounded border border-white/10">
@@ -239,22 +248,21 @@ export function CollegeExplorer() {
                               .toLowerCase()
                               .includes("autonomous") && (
                               <span className="flex items-center gap-1">
-                                <GraduationCap className="w-3.5 h-3.5 text-purple-400" />{" "}
+                                <GraduationCap className="w-3.5 h-3.5 text-emerald-400" />{" "}
                                 Autonomous
                               </span>
                             )}
                             <span className="flex items-center gap-1">
-                              <Building2 className="w-3.5 h-3.5 text-indigo-400" />{" "}
+                              <Building2 className="w-3.5 h-3.5 text-emerald-400" />{" "}
                               {college.branches.length} Branches
                             </span>
                           </div>
-                        </div>
-
-                        <div className="mt-auto pt-4 border-t border-white/5 flex items-center justify-between text-blue-400 font-semibold text-sm group-hover:text-blue-300">
-                          <span>View Details & Cutoffs</span>
-                          <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                        </div>
-                      </Link>
+                          <div className="mt-auto pt-4 border-t border-white/5 flex items-center justify-between text-emerald-400 font-semibold text-sm group-hover:text-emerald-300">
+                            <span>View Details & Cutoffs</span>
+                            <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                          </div>
+                        </motion.div>
+                      </PrefetchLink>
                     </div>
                   );
                 })}
@@ -275,12 +283,13 @@ export function CollegeExplorer() {
                     setDistrictFilter("All");
                     setSearchParams({}, { replace: true });
                   }}
-                  className="mt-6 px-4 py-2 bg-blue-500/20 text-blue-400 hover:bg-blue-500/30 rounded-lg text-sm font-semibold transition-colors border border-blue-500/30"
+                  className="mt-6 px-4 py-2 bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/30 rounded-lg text-sm font-semibold transition-colors border border-emerald-500/30"
                 >
                   Clear Filters
                 </button>
               </div>
             )}
+            </SkeletonFade>
           </div>
         </div>
       </div>
