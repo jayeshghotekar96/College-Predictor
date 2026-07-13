@@ -3,8 +3,7 @@ const ASSETS_TO_CACHE = [
   '/',
   '/index.html',
   '/manifest.json',
-  '/favicon.svg',
-  '/data/cutoffs.json'
+  '/favicon.svg'
 ];
 
 self.addEventListener('install', (event) => {

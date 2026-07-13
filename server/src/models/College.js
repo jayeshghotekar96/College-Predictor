@@ -44,7 +44,6 @@ const CollegeSchema = new Schema(
 CollegeSchema.index({ collegeName: "text", "branches.courseName": "text" });
 
 // Performance Indexes
-CollegeSchema.index({ district: 1 });
 CollegeSchema.index({ "branches.courseName": 1 });
 CollegeSchema.index({ "branches.cutoffs.category": 1, "branches.cutoffs.year": -1 });
 
