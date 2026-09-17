@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useRef } from "react";
+import React, { useState, useMemo, useRef, useEffect } from "react";
 import { Sparkline } from "./TrendChart";
 import { useVirtualizer } from "@tanstack/react-virtual";
 
@@ -13,6 +13,18 @@ export const ResultTable = React.memo(function ResultTable({
   const [sortKey, setSortKey] = useState("cutoff");
   const [sortAsc, setSortAsc] = useState(false);
   const [copiedChoice, setCopiedChoice] = useState(null);
+  const [isPrinting, setIsPrinting] = useState(false);
+
+  useEffect(() => {
+    const onBeforePrint = () => setIsPrinting(true);
+    const onAfterPrint = () => setIsPrinting(false);
+    window.addEventListener("beforeprint", onBeforePrint);
+    window.addEventListener("afterprint", onAfterPrint);
+    return () => {
+      window.removeEventListener("beforeprint", onBeforePrint);
+      window.removeEventListener("afterprint", onAfterPrint);
+    };
+  }, []);
 
   const handleSort = (key) => {
     if (sortKey === key) {
@@ -362,34 +374,36 @@ export const ResultTable = React.memo(function ResultTable({
         </table>
       </div>
 
-      {/* Printable Table (Hidden on Screen, Visible on Print) */}
-      <div className="hidden print:block w-full text-black bg-white">
-        <h2 className="text-xl font-bold mb-4 border-b border-black pb-2 text-black">MHT-CET Admission Predictor Results</h2>
-        <table className="w-full text-left text-xs border-collapse">
-          <thead>
-            <tr>
-              <th className="border border-black p-2 bg-gray-100 font-bold">Code</th>
-              <th className="border border-black p-2 bg-gray-100 font-bold">College Name</th>
-              <th className="border border-black p-2 bg-gray-100 font-bold">Branch</th>
-              <th className="border border-black p-2 bg-gray-100 font-bold">Cat</th>
-              <th className="border border-black p-2 bg-gray-100 font-bold">Cutoff</th>
-              <th className="border border-black p-2 bg-gray-100 font-bold">Chance</th>
-            </tr>
-          </thead>
-          <tbody>
-            {sortedResults.map((res) => (
-              <tr key={`${res.college.collegeCode}-${res.branch.choiceCode}`}>
-                <td className="border border-black p-2">{res.college.collegeCode}</td>
-                <td className="border border-black p-2 font-semibold">{res.college.collegeName}</td>
-                <td className="border border-black p-2">{res.branch.courseName}</td>
-                <td className="border border-black p-2">{category}</td>
-                <td className="border border-black p-2">{res.latestCutoff.toFixed(2)}%</td>
-                <td className="border border-black p-2 font-bold">{res.chance}</td>
+      {/* Printable Table (Mounted only on Print) */}
+      {isPrinting && (
+        <div className="hidden print:block w-full text-black bg-white">
+          <h2 className="text-xl font-bold mb-4 border-b border-black pb-2 text-black">MHT-CET Admission Predictor Results</h2>
+          <table className="w-full text-left text-xs border-collapse">
+            <thead>
+              <tr>
+                <th className="border border-black p-2 bg-gray-100 font-bold">Code</th>
+                <th className="border border-black p-2 bg-gray-100 font-bold">College Name</th>
+                <th className="border border-black p-2 bg-gray-100 font-bold">Branch</th>
+                <th className="border border-black p-2 bg-gray-100 font-bold">Cat</th>
+                <th className="border border-black p-2 bg-gray-100 font-bold">Cutoff</th>
+                <th className="border border-black p-2 bg-gray-100 font-bold">Chance</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+            </thead>
+            <tbody>
+              {sortedResults.map((res) => (
+                <tr key={`${res.college.collegeCode}-${res.branch.choiceCode}`}>
+                  <td className="border border-black p-2">{res.college.collegeCode}</td>
+                  <td className="border border-black p-2 font-semibold">{res.college.collegeName}</td>
+                  <td className="border border-black p-2">{res.branch.courseName}</td>
+                  <td className="border border-black p-2">{category}</td>
+                  <td className="border border-black p-2">{res.latestCutoff.toFixed(2)}%</td>
+                  <td className="border border-black p-2 font-bold">{res.chance}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
     </div>
   );
 });

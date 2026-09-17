@@ -1,3 +1,4 @@
+import React, { useMemo } from "react";
 import {
   ResponsiveContainer,
   LineChart,
@@ -133,80 +134,86 @@ export function TrendChart({ cutoffs, category }) {
   );
 }
 
-export function Sparkline({ cutoffs, category }) {
-  const catCutoffs = cutoffs.filter((c) => c.category === category);
-  const years = Array.from(new Set(catCutoffs.map((c) => c.year))).sort();
-  const data = years
-    .map((y) => {
-      const yearData = catCutoffs.filter((c) => c.year === y);
-      const maxRound = Math.max(...yearData.map((c) => c.round));
-      const record = yearData.find((c) => c.round === maxRound);
-      return {
-        value: record ? record.percentile : 0,
-      };
-    })
-    .filter((d) => d.value > 0);
+export const Sparkline = React.memo(function Sparkline({ cutoffs, category }) {
+  const sparklineData = useMemo(() => {
+    if (!cutoffs || cutoffs.length === 0) return null;
+    const catCutoffs = cutoffs.filter((c) => c.category === category);
+    if (catCutoffs.length === 0) return null;
 
-  if (data.length < 2) {
+    const years = Array.from(new Set(catCutoffs.map((c) => c.year))).sort();
+    const data = years
+      .map((y) => {
+        const yearData = catCutoffs.filter((c) => c.year === y);
+        const maxRound = Math.max(...yearData.map((c) => c.round));
+        const record = yearData.find((c) => c.round === maxRound);
+        return {
+          value: record ? record.percentile : 0,
+        };
+      })
+      .filter((d) => d.value > 0);
+
+    if (data.length < 2) return null;
+
+    const values = data.map((d) => d.value);
+    const minV = Math.min(...values);
+    const maxV = Math.max(...values);
+    const diff = maxV - minV;
+
+    const width = 60;
+    const height = 18;
+    const padding = 2;
+    const points = data
+      .map((d, i) => {
+        const x = padding + (i / (data.length - 1)) * (width - padding * 2);
+        const y =
+          diff === 0
+            ? height / 2
+            : height -
+              padding -
+              ((d.value - minV) / diff) * (height - padding * 2);
+        return `${x},${y}`;
+      })
+      .join(" ");
+
+    const strokeColor =
+      values[values.length - 1] >= values[0]
+        ? "var(--color-safe)"
+        : "var(--color-reach)";
+
+    const lastX =
+      padding + ((data.length - 1) * (width - padding * 2)) / (data.length - 1);
+    const lastY =
+      height -
+      padding -
+      (diff === 0
+        ? height / 2 - padding
+        : ((values[values.length - 1] - minV) / diff) * (height - padding * 2));
+
+    return { points, strokeColor, lastX, lastY, width, height };
+  }, [cutoffs, category]);
+
+  if (!sparklineData) {
     return <span className="text-[10px] text-ink-muted">No trend data</span>;
   }
 
-  const values = data.map((d) => d.value);
-  const minV = Math.min(...values);
-  const maxV = Math.max(...values);
-  const diff = maxV - minV;
-
-  // Render a simple lightweight inline SVG sparkline
-  const width = 60;
-  const height = 18;
-  const padding = 2;
-  const points = data
-    .map((d, i) => {
-      const x = padding + (i / (data.length - 1)) * (width - padding * 2);
-      const y =
-        diff === 0
-          ? height / 2
-          : height -
-            padding -
-            ((d.value - minV) / diff) * (height - padding * 2);
-      return `${x},${y}`;
-    })
-    .join(" ");
-
-  const strokeColor =
-    values[values.length - 1] >= values[0]
-      ? "var(--color-safe)"
-      : "var(--color-reach)";
-
   return (
     <svg
-      width={width}
-      height={height}
+      width={sparklineData.width}
+      height={sparklineData.height}
       className="overflow-visible inline-block"
     >
       <polyline
         fill="none"
-        stroke={strokeColor}
+        stroke={sparklineData.strokeColor}
         strokeWidth="1.5"
-        points={points}
+        points={sparklineData.points}
       />
-
       <circle
-        cx={
-          padding +
-          ((data.length - 1) * (width - padding * 2)) / (data.length - 1)
-        }
-        cy={
-          height -
-          padding -
-          (diff === 0
-            ? height / 2 - padding
-            : ((values[values.length - 1] - minV) / diff) *
-              (height - padding * 2))
-        }
+        cx={sparklineData.lastX}
+        cy={sparklineData.lastY}
         r="2"
-        fill={strokeColor}
+        fill={sparklineData.strokeColor}
       />
     </svg>
   );
-}
+});

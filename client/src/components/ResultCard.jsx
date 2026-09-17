@@ -185,7 +185,13 @@ export const ResultCard = React.memo(function ResultCard({
           whileTap={{ scale: 0.95 }}
           onClick={(e) => {
             e.stopPropagation();
-            onToggleShortlist();
+            onToggleShortlist(
+              college.collegeCode,
+              branch.choiceCode,
+              college.collegeName,
+              branch.courseName,
+              college.district,
+            );
           }}
           className={`flex-1 flex items-center justify-center gap-1.5 py-2 px-2 rounded-md text-xs font-semibold transition-all border ${
             isShortlisted
@@ -216,7 +222,14 @@ export const ResultCard = React.memo(function ResultCard({
           whileTap={{ scale: 0.95 }}
           onClick={(e) => {
             e.stopPropagation();
-            onToggleOption();
+            onToggleOption(
+              college.collegeCode,
+              branch.choiceCode,
+              college.collegeName,
+              branch.courseName,
+              college.district,
+              latestCutoff
+            );
           }}
           className={`flex-1 flex items-center justify-center gap-1.5 py-2 px-2 rounded-md text-xs font-semibold transition-all border ${
             isAddedToOption

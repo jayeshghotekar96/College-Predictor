@@ -1,6 +1,7 @@
+import React from "react";
 import { motion } from "framer-motion";
 
-export function ProbabilityMeter({
+export const ProbabilityMeter = React.memo(function ProbabilityMeter({
   userPercentile,
   cutoff,
   size = 64,
@@ -76,4 +77,4 @@ export function ProbabilityMeter({
       </div>
     </div>
   );
-}
+});

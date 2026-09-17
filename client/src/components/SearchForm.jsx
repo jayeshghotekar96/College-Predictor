@@ -1,8 +1,11 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
+import { Search } from "lucide-react";
 
 export function SearchForm({
   filters,
   onFilterChange,
+  onSearch,
+  isPredicting = false,
   categories,
   allBranches,
   allDistricts,
@@ -10,82 +13,111 @@ export function SearchForm({
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [branchSearch, setBranchSearch] = useState("");
   const [districtSearch, setDistrictSearch] = useState("");
-  // Decoupled local state for the slider to prevent hanging
+  // Local state to prevent expensive live queries during typing / slider moving
+  const [localFilters, setLocalFilters] = useState(filters);
   const [localPercentile, setLocalPercentile] = useState(filters.percentile);
 
-  // Sync local state if URL state changes externally
+  // Sync local state if external filters change
   useEffect(() => {
+    setLocalFilters(filters);
     setLocalPercentile(filters.percentile);
-  }, [filters.percentile]);
+  }, [filters]);
 
   // Handle inputs
   const handlePercentileChange = (val) => {
     const clamped = Math.min(100, Math.max(0, val));
-    onFilterChange({ ...filters, percentile: clamped });
+    setLocalPercentile(clamped);
+    setLocalFilters((prev) => ({ ...prev, percentile: clamped }));
   };
 
   const handleCategoryChange = (val) => {
-    onFilterChange({ ...filters, category: val });
+    setLocalFilters((prev) => ({ ...prev, category: val }));
   };
 
   const handleLevelChange = (val) => {
-    onFilterChange({ ...filters, level: val === "ALL" ? undefined : val });
+    setLocalFilters((prev) => ({
+      ...prev,
+      level: val === "ALL" ? undefined : val,
+    }));
   };
 
   const handleGenderChange = (val) => {
-    onFilterChange({ ...filters, gender: val === "ALL" ? undefined : val });
+    setLocalFilters((prev) => ({
+      ...prev,
+      gender: val === "ALL" ? undefined : val,
+    }));
   };
 
   const toggleBranch = (branch) => {
-    const current = filters.branches || [];
+    const current = localFilters.branches || [];
     const next = current.includes(branch)
       ? current.filter((b) => b !== branch)
       : [...current, branch];
-    onFilterChange({
-      ...filters,
+    setLocalFilters((prev) => ({
+      ...prev,
       branches: next.length > 0 ? next : undefined,
-    });
+    }));
   };
 
   const toggleDistrict = (district) => {
-    const current = filters.districts || [];
+    const current = localFilters.districts || [];
     const next = current.includes(district)
       ? current.filter((d) => d !== district)
       : [...current, district];
-    onFilterChange({
-      ...filters,
+    setLocalFilters((prev) => ({
+      ...prev,
       districts: next.length > 0 ? next : undefined,
-    });
+    }));
+  };
+
+  const handleSearchSubmit = (e) => {
+    if (e) e.preventDefault();
+    const clamped = Math.min(100, Math.max(0, parseFloat(localPercentile) || 0));
+    const updated = {
+      ...localFilters,
+      percentile: clamped,
+    };
+    onFilterChange?.(updated);
+    onSearch?.(updated);
   };
 
   const clearAllFilters = () => {
-    onFilterChange({
-      percentile: filters.percentile,
-      category: filters.category,
+    const reset = {
+      percentile: localPercentile,
+      category: localFilters.category,
       level: undefined,
       gender: undefined,
       branches: undefined,
       districts: undefined,
-    });
+    };
+    setLocalFilters(reset);
     setBranchSearch("");
     setDistrictSearch("");
+    onFilterChange?.(reset);
+    onSearch?.(reset);
   };
 
-  // Sort and filter branches/districts based on search inputs
-  const filteredBranches = allBranches
-    .filter((b) => b.toLowerCase().includes(branchSearch.toLowerCase()))
-    .slice(0, 100); // limit display count for performance
+  // Sort and filter branches/districts based on search inputs (memoized)
+  const filteredBranches = useMemo(() => {
+    const q = branchSearch.toLowerCase();
+    return allBranches
+      .filter((b) => b.toLowerCase().includes(q))
+      .slice(0, 100);
+  }, [allBranches, branchSearch]);
 
-  const filteredDistricts = allDistricts
-    .filter((d) => d.toLowerCase().includes(districtSearch.toLowerCase()))
-    .slice(0, 100);
+  const filteredDistricts = useMemo(() => {
+    const q = districtSearch.toLowerCase();
+    return allDistricts
+      .filter((d) => d.toLowerCase().includes(q))
+      .slice(0, 100);
+  }, [allDistricts, districtSearch]);
 
   return (
-    <div className="glass-panel rounded-md p-5 md:p-6 mb-6">
-      {/* Primary Row: Percentile & Category */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-end">
+    <div className="glass-panel rounded-xl p-5 md:p-6 mb-6">
+      {/* Primary Row: Percentile, Category & Search College Button */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-6 items-end">
         {/* Percentile Input */}
-        <div className="md:col-span-2">
+        <div className="lg:col-span-5">
           <div className="flex justify-between items-center mb-2">
             <label className="font-heading text-xs font-bold text-white uppercase tracking-wider">
               My CET Percentile
@@ -97,16 +129,18 @@ export function SearchForm({
                 min="0"
                 max="100"
                 value={localPercentile}
-                onChange={(e) =>
-                  setLocalPercentile(parseFloat(e.target.value) || 0)
-                }
+                onChange={(e) => {
+                  const val = parseFloat(e.target.value) || 0;
+                  setLocalPercentile(val);
+                }}
                 onBlur={() => handlePercentileChange(localPercentile)}
-                onKeyDown={(e) =>
-                  e.key === "Enter" && handlePercentileChange(localPercentile)
-                }
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    handleSearchSubmit();
+                  }
+                }}
                 className="mono font-semibold text-sm w-20 text-right glass-input px-2 py-1 rounded-sm"
               />
-
               <span className="text-xs text-white/50">%</span>
             </div>
           </div>
@@ -130,12 +164,12 @@ export function SearchForm({
         </div>
 
         {/* Category Selector */}
-        <div>
+        <div className="lg:col-span-4">
           <label className="font-heading text-xs font-bold text-white uppercase tracking-wider block mb-2">
             CAP Reservation Category
           </label>
           <select
-            value={filters.category}
+            value={localFilters.category}
             onChange={(e) => handleCategoryChange(e.target.value)}
             className="w-full glass-input px-3 py-2 rounded-sm text-xs font-medium cursor-pointer"
           >
@@ -154,6 +188,28 @@ export function SearchForm({
                 );
               })}
           </select>
+        </div>
+
+        {/* Search College Button */}
+        <div className="lg:col-span-3">
+          <button
+            type="button"
+            onClick={handleSearchSubmit}
+            disabled={isPredicting}
+            className="w-full py-2.5 px-4 bg-emerald-600 hover:bg-emerald-500 active:scale-[0.98] text-white font-heading font-bold text-xs uppercase tracking-wider rounded-lg transition-all flex items-center justify-center gap-2 shadow-lg shadow-emerald-950/40 cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
+          >
+            {isPredicting ? (
+              <>
+                <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                <span>Searching...</span>
+              </>
+            ) : (
+              <>
+                <Search className="w-4 h-4 text-emerald-100" />
+                <span>Search College</span>
+              </>
+            )}
+          </button>
         </div>
       </div>
 
@@ -203,13 +259,12 @@ export function SearchForm({
                       name="levelScope"
                       checked={
                         opt.value === "ALL"
-                          ? !filters.level
-                          : filters.level === opt.value
+                          ? !localFilters.level
+                          : localFilters.level === opt.value
                       }
                       onChange={() => handleLevelChange(opt.value)}
                       className="accent-amber"
                     />
-
                     <span>{opt.label}</span>
                   </label>
                 ))}
@@ -219,12 +274,12 @@ export function SearchForm({
             {/* Gender Scope Selection */}
             <div>
               <label className="font-heading text-[10px] font-bold text-white/50 uppercase tracking-wider block mb-2">
-                Gender Quota Scope
+                Seat Type / Gender
               </label>
               <div className="flex flex-col gap-1.5">
                 {[
-                  { label: "All Quotas", value: "ALL" },
-                  { label: "General / Co-Ed (G)", value: "G" },
+                  { label: "All Seats", value: "ALL" },
+                  { label: "General Seats (G)", value: "G" },
                   { label: "Ladies Only (L)", value: "L" },
                 ].map((opt) => (
                   <label
@@ -236,127 +291,136 @@ export function SearchForm({
                       name="genderScope"
                       checked={
                         opt.value === "ALL"
-                          ? !filters.gender
-                          : filters.gender === opt.value
+                          ? !localFilters.gender
+                          : localFilters.gender === opt.value
                       }
                       onChange={() => handleGenderChange(opt.value)}
                       className="accent-amber"
                     />
-
                     <span>{opt.label}</span>
                   </label>
                 ))}
               </div>
             </div>
 
-            {/* District Checklist Filter */}
+            {/* District Filter Multi-select with Search */}
             <div>
-              <label className="font-heading text-[10px] font-bold text-white/50 uppercase tracking-wider block mb-1">
-                Districts / Locations
-              </label>
+              <div className="flex justify-between items-center mb-1.5">
+                <label className="font-heading text-[10px] font-bold text-white/50 uppercase tracking-wider">
+                  Districts ({localFilters.districts?.length || "All"})
+                </label>
+                {localFilters.districts && localFilters.districts.length > 0 && (
+                  <button
+                    onClick={() =>
+                      setLocalFilters((prev) => ({ ...prev, districts: undefined }))
+                    }
+                    className="text-[10px] text-amber hover:underline cursor-pointer"
+                  >
+                    Reset
+                  </button>
+                )}
+              </div>
               <input
                 type="text"
-                placeholder="Search districts..."
+                placeholder="Search district..."
                 value={districtSearch}
                 onChange={(e) => setDistrictSearch(e.target.value)}
-                className="w-full glass-input px-2 py-1 rounded-sm text-[11px] mb-2"
+                className="w-full glass-input px-2.5 py-1 rounded-sm text-xs mb-2"
               />
-
-              <div className="max-h-36 overflow-y-auto border border-white/10 rounded-sm p-2 flex flex-col gap-1.5 bg-white/5">
+              <div className="max-h-36 overflow-y-auto space-y-1 pr-1 bg-black/20 p-2 rounded-sm border border-white/5">
                 {filteredDistricts.map((dist) => (
                   <label
                     key={dist}
-                    className="flex items-center gap-2 text-xs text-white/80 cursor-pointer hover:text-amber"
+                    className="flex items-center gap-2 text-xs text-white/70 hover:text-white cursor-pointer select-none"
                   >
                     <input
                       type="checkbox"
-                      checked={filters.districts?.includes(dist) || false}
+                      checked={(localFilters.districts || []).includes(dist)}
                       onChange={() => toggleDistrict(dist)}
-                      className="accent-amber"
+                      className="rounded-xs accent-amber"
                     />
-
                     <span className="truncate">{dist}</span>
                   </label>
                 ))}
-                {filteredDistricts.length === 0 && (
-                  <span className="text-[10px] text-white/50">
-                    No districts found
-                  </span>
-                )}
               </div>
             </div>
 
-            {/* Branch Checklist Filter */}
+            {/* Branch Filter Multi-select with Search */}
             <div>
-              <label className="font-heading text-[10px] font-bold text-white/50 uppercase tracking-wider block mb-1">
-                Course Branches
-              </label>
+              <div className="flex justify-between items-center mb-1.5">
+                <label className="font-heading text-[10px] font-bold text-white/50 uppercase tracking-wider">
+                  Branches ({localFilters.branches?.length || "All"})
+                </label>
+                {localFilters.branches && localFilters.branches.length > 0 && (
+                  <button
+                    onClick={() =>
+                      setLocalFilters((prev) => ({ ...prev, branches: undefined }))
+                    }
+                    className="text-[10px] text-amber hover:underline cursor-pointer"
+                  >
+                    Reset
+                  </button>
+                )}
+              </div>
               <input
                 type="text"
-                placeholder="Search branches..."
+                placeholder="Search branch..."
                 value={branchSearch}
                 onChange={(e) => setBranchSearch(e.target.value)}
-                className="w-full glass-input px-2 py-1 rounded-sm text-[11px] mb-2"
+                className="w-full glass-input px-2.5 py-1 rounded-sm text-xs mb-2"
               />
-
-              <div className="max-h-36 overflow-y-auto border border-white/10 rounded-sm p-2 flex flex-col gap-1.5 bg-white/5">
+              <div className="max-h-36 overflow-y-auto space-y-1 pr-1 bg-black/20 p-2 rounded-sm border border-white/5">
                 {filteredBranches.map((branch) => (
                   <label
                     key={branch}
-                    className="flex items-center gap-2 text-xs text-white/80 cursor-pointer hover:text-amber"
+                    className="flex items-center gap-2 text-xs text-white/70 hover:text-white cursor-pointer select-none"
                   >
                     <input
                       type="checkbox"
-                      checked={filters.branches?.includes(branch) || false}
+                      checked={(localFilters.branches || []).includes(branch)}
                       onChange={() => toggleBranch(branch)}
-                      className="accent-amber"
+                      className="rounded-xs accent-amber"
                     />
-
                     <span className="truncate" title={branch}>
                       {branch}
                     </span>
                   </label>
                 ))}
-                {filteredBranches.length === 0 && (
-                  <span className="text-[10px] text-white/50">
-                    No branches found
-                  </span>
-                )}
               </div>
             </div>
           </div>
         )}
       </div>
 
-      {/* active filters chips */}
+      {/* Active filters chips and Advanced Search Trigger */}
       {showAdvanced && (
-        <div className="flex flex-wrap gap-2 mt-4 items-center">
-          {(filters.level ||
-            filters.gender ||
-            (filters.branches && filters.branches.length > 0) ||
-            (filters.districts && filters.districts.length > 0)) && (
+        <div className="flex flex-wrap gap-2 mt-4 items-center pt-3 border-t border-white/5">
+          {(localFilters.level ||
+            localFilters.gender ||
+            (localFilters.branches && localFilters.branches.length > 0) ||
+            (localFilters.districts && localFilters.districts.length > 0)) && (
             <>
               <span className="text-[10px] uppercase text-white/50 font-bold tracking-wider">
-                Active:
+                Selected:
               </span>
-              {filters.level && (
+              {localFilters.level && (
                 <span className="text-[10px] bg-white/10 px-2 py-0.5 border border-white/20 text-white rounded-sm font-medium">
-                  Level: {filters.level}
+                  Level: {localFilters.level}
                 </span>
               )}
-              {filters.gender && (
+              {localFilters.gender && (
                 <span className="text-[10px] bg-white/10 px-2 py-0.5 border border-white/20 text-white rounded-sm font-medium">
-                  Gender: {filters.gender}
+                  Gender: {localFilters.gender}
                 </span>
               )}
-              {filters.districts && filters.districts.length > 0 && (
+              {localFilters.districts && localFilters.districts.length > 0 && (
                 <span className="text-[10px] bg-white/10 px-2 py-0.5 border border-white/20 text-white rounded-sm font-medium">
-                  Districts ({filters.districts.length})
+                  Districts ({localFilters.districts.length})
                 </span>
               )}
-              {filters.branches && filters.branches.length > 0 && (
+              {localFilters.branches && localFilters.branches.length > 0 && (
                 <span className="text-[10px] bg-white/10 px-2 py-0.5 border border-white/20 text-white rounded-sm font-medium">
-                  Branches ({filters.branches.length})
+                  Branches ({localFilters.branches.length})
                 </span>
               )}
               <button
@@ -367,6 +431,18 @@ export function SearchForm({
               </button>
             </>
           )}
+
+          <div className="ml-auto flex items-center gap-3">
+            <button
+              type="button"
+              onClick={handleSearchSubmit}
+              disabled={isPredicting}
+              className="py-1.5 px-3 bg-emerald-600 hover:bg-emerald-500 active:scale-95 text-white font-heading font-bold text-[11px] uppercase tracking-wider rounded-md transition-all flex items-center gap-1.5 shadow-sm cursor-pointer disabled:opacity-60"
+            >
+              <Search className="w-3.5 h-3.5" />
+              <span>Apply & Search</span>
+            </button>
+          </div>
         </div>
       )}
     </div>

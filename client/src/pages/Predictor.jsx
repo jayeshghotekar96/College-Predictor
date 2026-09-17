@@ -1,10 +1,11 @@
-import React, { useState, useMemo, useDeferredValue } from "react";
+import React, { useState, useMemo, useDeferredValue, useCallback, useRef, useEffect } from "react";
 import { useData } from "../lib/DataContext";
 import { useUrlState } from "../hooks/useUrlState";
 import { useShortlist } from "../hooks/useShortlist";
 import { predictionsAPI } from "../services/api";
 import { SearchForm } from "../components/SearchForm";
 import { ResultCard } from "../components/ResultCard";
+import { VirtualCardColumn } from "../components/VirtualCardColumn";
 import { ShortlistPanel } from "../components/ShortlistPanel";
 import { ReversePredictor } from "../components/ReversePredictor";
 const CompetitivenessHeatmap = React.lazy(() => import("../components/CompetitivenessHeatmap").then(m => ({ default: m.CompetitivenessHeatmap })));
@@ -12,6 +13,7 @@ import { ResultTable } from "../components/ResultTable";
 import { OptionFormPanel } from "../components/OptionFormPanel";
 import { useOptionForm } from "../hooks/useOptionForm";
 import { PredictorSkeleton } from "../components/skeletons/PredictorSkeleton";
+import { ResultCardSkeleton } from "../components/skeletons/ResultCardSkeleton";
 const DEFAULT_FILTERS = {
   percentile: 90.0,
   category: "GOPENS",
@@ -20,6 +22,61 @@ const DEFAULT_FILTERS = {
   branches: undefined,
   districts: undefined,
 };
+
+const DistrictGroupCard = React.memo(function DistrictGroupCard({
+  group,
+  category,
+  userPercentile,
+  isShortlisted,
+  onToggleShortlist,
+  isAddedToOption,
+  onToggleOption,
+}) {
+  const [expanded, setExpanded] = useState(false);
+  const visibleResults = expanded ? group.results : group.results.slice(0, 8);
+  const remainingCount = group.results.length - 8;
+
+  return (
+    <div className="glass-panel rounded-xl p-5 shadow-xs">
+      <h3 className="font-heading text-sm font-bold text-white mb-4 pb-2 border-b border-white/10 flex justify-between items-center">
+        <span>📍 {group.district}</span>
+        <span className="mono text-xs font-semibold bg-white/10 px-2 py-0.5 rounded-full border border-white/20 text-white/80">
+          {group.results.length} Seats
+        </span>
+      </h3>
+      <div className="grid grid-cols-1 lg:grid-cols-2 min-[1400px]:grid-cols-3 min-[1600px]:grid-cols-4 gap-4">
+        {visibleResults.map((res, i) => (
+          <ResultCard
+            key={`${res.college.collegeCode}-${res.branch.choiceCode}`}
+            result={res}
+            category={category}
+            userPercentile={userPercentile}
+            isShortlisted={isShortlisted(
+              res.college.collegeCode,
+              res.branch.choiceCode,
+            )}
+            onToggleShortlist={onToggleShortlist}
+            isAddedToOption={isAddedToOption(res.branch.choiceCode)}
+            onToggleOption={onToggleOption}
+            index={i}
+          />
+        ))}
+      </div>
+      {remainingCount > 0 && (
+        <div className="mt-4 pt-3 border-t border-white/5 flex justify-center">
+          <button
+            onClick={() => setExpanded(!expanded)}
+            className="text-xs font-heading font-semibold text-emerald-400 hover:text-emerald-300 py-1.5 px-4 rounded-md bg-emerald-500/10 hover:bg-emerald-500/20 transition-colors cursor-pointer border border-emerald-500/20"
+          >
+            {expanded
+              ? "Show Less"
+              : `Show ${remainingCount} More in ${group.district}`}
+          </button>
+        </div>
+      )}
+    </div>
+  );
+});
 
 export function PredictorPage() {
   const { data, loading, error, retry } = useData();
@@ -79,34 +136,69 @@ export function PredictorPage() {
   const [isPredicting, setIsPredicting] = useState(false);
   const [predictionError, setPredictionError] = useState(null);
 
-  // Fetch predictions from the server when filters change
-  React.useEffect(() => {
-    if (!filters.percentile || !filters.category) return;
+  // Manual & initial prediction executor — runs on initial load and when "Search College" is clicked
+  const executePrediction = useCallback((targetFilters = filters) => {
+    if (!targetFilters.percentile || !targetFilters.category) return;
     
-    let isMounted = true;
     setIsPredicting(true);
     setPredictionError(null);
     
     predictionsAPI.predict({
-      percentile: filters.percentile,
-      category: filters.category,
-      branches: filters.branches,
-      districts: filters.districts
+      percentile: targetFilters.percentile,
+      category: targetFilters.category,
+      branches: targetFilters.branches,
+      districts: targetFilters.districts
     }).then(res => {
-      if (isMounted) {
-        setPredictionResults(res.data.results);
-        setIsPredicting(false);
-      }
+      setPredictionResults(res.data.results || { safe: [], moderate: [], reach: [] });
+      setIsPredicting(false);
     }).catch(err => {
-      if (isMounted) {
-        console.error("Prediction error:", err);
-        setPredictionError(err.message || "Failed to load predictions");
-        setIsPredicting(false);
-      }
+      console.error("Prediction error:", err);
+      setPredictionError(err.message || "Failed to load predictions");
+      setIsPredicting(false);
     });
-
-    return () => { isMounted = false; };
   }, [filters]);
+
+  // Initial load only when page mounts with valid percentile and category
+  const initialSearchDone = useRef(false);
+  useEffect(() => {
+    if (!initialSearchDone.current && filters.percentile && filters.category) {
+      initialSearchDone.current = true;
+      executePrediction(filters);
+    }
+  }, [executePrediction, filters]);
+
+  // Stable toggle handlers for child cards
+  const handleToggleShortlist = useCallback(
+    (collegeCode, choiceCode, collegeName, courseName, district) => {
+      toggle(collegeCode, choiceCode, collegeName, courseName, district);
+    },
+    [toggle],
+  );
+
+  const handleToggleOption = useCallback(
+    (
+      collegeCode,
+      choiceCode,
+      collegeName,
+      courseName,
+      district,
+      latestCutoff,
+    ) => {
+      if (hasOption(choiceCode)) {
+        removeOption(choiceCode);
+      } else {
+        addOption(
+          collegeCode,
+          choiceCode,
+          collegeName,
+          courseName,
+          district,
+          latestCutoff,
+        );
+      }
+    },
+    [hasOption, removeOption, addOption],
+  );
 
   // Apply search query match and sorting selection using DEFERRED search term
   const filteredAndSortedResults = useMemo(() => {
@@ -115,12 +207,8 @@ export function PredictorPage() {
 
     const filterFn = (res) => {
       if (!searchLower) return true;
-      return (
-        res.college.collegeName.toLowerCase().includes(searchLower) ||
-        res.college.collegeCode.toString().includes(searchLower) ||
-        res.branch.courseName.toLowerCase().includes(searchLower) ||
-        res.branch.choiceCode.includes(searchLower)
-      );
+      const haystack = (res._searchStr || (res._searchStr = `${res.college.collegeName} ${res.college.collegeCode} ${res.branch.courseName} ${res.branch.choiceCode}`.toLowerCase()));
+      return haystack.includes(searchLower);
     };
 
     const sortFn = (a, b) => {
@@ -215,21 +303,6 @@ export function PredictorPage() {
     filteredAndSortedResults.moderate.length +
     filteredAndSortedResults.reach.length;
 
-  const handleToggleOption = (
-    collegeCode,
-    choiceCode,
-    collegeName,
-    courseName,
-    district,
-    latestCutoff,
-  ) => {
-    if (hasOption(choiceCode)) {
-      removeOption(choiceCode);
-    } else {
-      addOption(collegeCode, choiceCode, collegeName, courseName, district, latestCutoff);
-    }
-  };
-
   return (
     <div className="w-full relative flex-1 flex flex-col predictor-main-content">
       {/* Tab Navigation Menu */}
@@ -264,6 +337,8 @@ export function PredictorPage() {
             <SearchForm
               filters={filters}
               onFilterChange={setFilters}
+              onSearch={executePrediction}
+              isPredicting={isPredicting}
               categories={data.categories}
               allBranches={allBranches}
               allDistricts={allDistricts}
@@ -407,11 +482,26 @@ export function PredictorPage() {
               </div>
 
               {isPredicting ? (
-                <div className="glass-panel rounded-xl p-12 text-center text-slate-400">
-                  <div className="w-8 h-8 border-4 border-slate-700 border-t-emerald-500 rounded-full animate-spin mx-auto mb-4" />
-                  <p className="font-heading text-sm font-semibold text-slate-300">
-                    Calculating Predictions...
-                  </p>
+                <div className="grid grid-cols-1 lg:grid-cols-2 min-[1400px]:grid-cols-3 gap-6 items-start animate-fadeIn">
+                  {[
+                    { title: "Safe Choices", color: "border-emerald-500/30 text-emerald-300 bg-emerald-500/20" },
+                    { title: "Moderate Targets", color: "border-amber-500/30 text-amber-300 bg-amber-500/20" },
+                    { title: "Reach / Dream", color: "border-red-500/30 text-red-300 bg-red-500/20" },
+                  ].map((col, idx) => (
+                    <div key={idx} className="space-y-4">
+                      <div className={`px-4 py-3 rounded-lg flex items-center justify-between border ${col.color}`}>
+                        <h3 className="font-heading text-xs font-bold uppercase tracking-wider">
+                          {col.title}
+                        </h3>
+                        <span className="text-[10px] mono bg-black/20 px-2 py-0.5 rounded">Searching...</span>
+                      </div>
+                      <div className="space-y-4">
+                        <ResultCardSkeleton />
+                        <ResultCardSkeleton />
+                        <ResultCardSkeleton />
+                      </div>
+                    </div>
+                  ))}
                 </div>
               ) : predictionError ? (
                 <div className="glass-panel rounded-xl p-12 text-center text-red-400">
@@ -424,9 +514,7 @@ export function PredictorPage() {
                     No cutoff predictions found
                   </p>
                   <p className="text-xs mt-1 max-w-md mx-auto">
-                    Try raising your percentile score slider, switching
-                    categories, or removing advanced filters to explore more
-                    options.
+                    Try raising your percentile score, switching categories, or removing advanced filters to explore more options.
                   </p>
                 </div>
               ) : displayMode === "table" ? (
@@ -437,21 +525,7 @@ export function PredictorPage() {
                     isShortlisted={(collegeCode, choiceCode) =>
                       isShortlisted(collegeCode, choiceCode)
                     }
-                    onToggleShortlist={(
-                      collegeCode,
-                      choiceCode,
-                      collegeName,
-                      courseName,
-                      district,
-                    ) =>
-                      toggle(
-                        collegeCode,
-                        choiceCode,
-                        collegeName,
-                        courseName,
-                        district,
-                      )
-                    }
+                    onToggleShortlist={handleToggleShortlist}
                     isAddedToOption={hasOption}
                     onToggleOption={handleToggleOption}
                   />
@@ -469,47 +543,16 @@ export function PredictorPage() {
                       </span>
                     </div>
 
-                    <div className="max-h-[70vh] overflow-y-auto pr-1">
-                      {filteredAndSortedResults.safe.length === 0 ? (
-                        <p className="text-xs text-slate-500 bg-black/20 p-4 text-center rounded-lg border border-dashed border-white/10">
-                          No safe matches. Try moderate choices.
-                        </p>
-                      ) : (
-                        filteredAndSortedResults.safe.map((res, i) => (
-                          <ResultCard
-                            key={`${res.college.collegeCode}-${res.branch.choiceCode}`}
-                            result={res}
-                            category={filters.category}
-                            userPercentile={filters.percentile}
-                            isShortlisted={isShortlisted(
-                              res.college.collegeCode,
-                              res.branch.choiceCode,
-                            )}
-                            onToggleShortlist={() =>
-                              toggle(
-                                res.college.collegeCode,
-                                res.branch.choiceCode,
-                                res.college.collegeName,
-                                res.branch.courseName,
-                                res.college.district,
-                              )
-                            }
-                            isAddedToOption={hasOption(res.branch.choiceCode)}
-                            onToggleOption={() =>
-                              handleToggleOption(
-                                res.college.collegeCode,
-                                res.branch.choiceCode,
-                                res.college.collegeName,
-                                res.branch.courseName,
-                                res.college.district,
-                                res.latestCutoff
-                              )
-                            }
-                            index={i}
-                          />
-                        ))
-                      )}
-                    </div>
+                    <VirtualCardColumn
+                      items={filteredAndSortedResults.safe}
+                      category={filters.category}
+                      userPercentile={filters.percentile}
+                      isShortlisted={isShortlisted}
+                      onToggleShortlist={handleToggleShortlist}
+                      isAddedToOption={hasOption}
+                      onToggleOption={handleToggleOption}
+                      emptyMessage="No safe matches. Try moderate choices."
+                    />
                   </div>
 
                   {/* Column 2: MODERATE (Amber) */}
@@ -523,47 +566,16 @@ export function PredictorPage() {
                       </span>
                     </div>
 
-                    <div className="max-h-[70vh] overflow-y-auto pr-1">
-                      {filteredAndSortedResults.moderate.length === 0 ? (
-                        <p className="text-xs text-slate-500 bg-black/20 p-4 text-center rounded-lg border border-dashed border-white/10">
-                          No moderate matches. Explore reach boundaries.
-                        </p>
-                      ) : (
-                        filteredAndSortedResults.moderate.map((res, i) => (
-                          <ResultCard
-                            key={`${res.college.collegeCode}-${res.branch.choiceCode}`}
-                            result={res}
-                            category={filters.category}
-                            userPercentile={filters.percentile}
-                            isShortlisted={isShortlisted(
-                              res.college.collegeCode,
-                              res.branch.choiceCode,
-                            )}
-                            onToggleShortlist={() =>
-                              toggle(
-                                res.college.collegeCode,
-                                res.branch.choiceCode,
-                                res.college.collegeName,
-                                res.branch.courseName,
-                                res.college.district,
-                              )
-                            }
-                            isAddedToOption={hasOption(res.branch.choiceCode)}
-                            onToggleOption={() =>
-                              handleToggleOption(
-                                res.college.collegeCode,
-                                res.branch.choiceCode,
-                                res.college.collegeName,
-                                res.branch.courseName,
-                                res.college.district,
-                                res.latestCutoff
-                              )
-                            }
-                            index={i}
-                          />
-                        ))
-                      )}
-                    </div>
+                    <VirtualCardColumn
+                      items={filteredAndSortedResults.moderate}
+                      category={filters.category}
+                      userPercentile={filters.percentile}
+                      isShortlisted={isShortlisted}
+                      onToggleShortlist={handleToggleShortlist}
+                      isAddedToOption={hasOption}
+                      onToggleOption={handleToggleOption}
+                      emptyMessage="No moderate matches. Explore reach boundaries."
+                    />
                   </div>
 
                   {/* Column 3: REACH (Red) */}
@@ -577,99 +589,32 @@ export function PredictorPage() {
                       </span>
                     </div>
 
-                    <div className="max-h-[70vh] overflow-y-auto pr-1">
-                      {filteredAndSortedResults.reach.length === 0 ? (
-                        <p className="text-xs text-slate-500 bg-black/20 p-4 text-center rounded-lg border border-dashed border-white/10">
-                          No reach candidates found.
-                        </p>
-                      ) : (
-                        filteredAndSortedResults.reach.map((res, i) => (
-                          <ResultCard
-                            key={`${res.college.collegeCode}-${res.branch.choiceCode}`}
-                            result={res}
-                            category={filters.category}
-                            userPercentile={filters.percentile}
-                            isShortlisted={isShortlisted(
-                              res.college.collegeCode,
-                              res.branch.choiceCode,
-                            )}
-                            onToggleShortlist={() =>
-                              toggle(
-                                res.college.collegeCode,
-                                res.branch.choiceCode,
-                                res.college.collegeName,
-                                res.branch.courseName,
-                                res.college.district,
-                              )
-                            }
-                            isAddedToOption={hasOption(res.branch.choiceCode)}
-                            onToggleOption={() =>
-                              handleToggleOption(
-                                res.college.collegeCode,
-                                res.branch.choiceCode,
-                                res.college.collegeName,
-                                res.branch.courseName,
-                                res.college.district,
-                                res.latestCutoff
-                              )
-                            }
-                            index={i}
-                          />
-                        ))
-                      )}
-                    </div>
+                    <VirtualCardColumn
+                      items={filteredAndSortedResults.reach}
+                      category={filters.category}
+                      userPercentile={filters.percentile}
+                      isShortlisted={isShortlisted}
+                      onToggleShortlist={handleToggleShortlist}
+                      isAddedToOption={hasOption}
+                      onToggleOption={handleToggleOption}
+                      emptyMessage="No reach candidates found."
+                    />
                   </div>
                 </div>
               ) : (
                 /* Group by District View */
                 <div className="space-y-8 animate-fadeIn">
                   {resultsByDistrict.map((group) => (
-                    <div
+                    <DistrictGroupCard
                       key={group.district}
-                      className="glass-panel rounded-xl p-5 shadow-xs"
-                    >
-                      <h3 className="font-heading text-sm font-bold text-white mb-4 pb-2 border-b border-white/10 flex justify-between items-center">
-                        <span>📍 {group.district}</span>
-                        <span className="mono text-xs font-semibold bg-white/10 px-2 py-0.5 rounded-full border border-white/20 text-white/80">
-                          {group.results.length} Seats
-                        </span>
-                      </h3>
-                      <div className="grid grid-cols-1 lg:grid-cols-2 min-[1400px]:grid-cols-3 min-[1600px]:grid-cols-4 gap-4">
-                        {group.results.map((res, i) => (
-                          <ResultCard
-                            key={`${res.college.collegeCode}-${res.branch.choiceCode}`}
-                            result={res}
-                            category={filters.category}
-                            userPercentile={filters.percentile}
-                            isShortlisted={isShortlisted(
-                              res.college.collegeCode,
-                              res.branch.choiceCode,
-                            )}
-                            onToggleShortlist={() =>
-                              toggle(
-                                res.college.collegeCode,
-                                res.branch.choiceCode,
-                                res.college.collegeName,
-                                res.branch.courseName,
-                                res.college.district,
-                              )
-                            }
-                            isAddedToOption={hasOption(res.branch.choiceCode)}
-                            onToggleOption={() =>
-                              handleToggleOption(
-                                res.college.collegeCode,
-                                res.branch.choiceCode,
-                                res.college.collegeName,
-                                res.branch.courseName,
-                                res.college.district,
-                                res.latestCutoff
-                              )
-                            }
-                            index={i}
-                          />
-                        ))}
-                      </div>
-                    </div>
+                      group={group}
+                      category={filters.category}
+                      userPercentile={filters.percentile}
+                      isShortlisted={isShortlisted}
+                      onToggleShortlist={handleToggleShortlist}
+                      isAddedToOption={hasOption}
+                      onToggleOption={handleToggleOption}
+                    />
                   ))}
                 </div>
               )}
